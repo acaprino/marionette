@@ -1,0 +1,13 @@
+{
+  "name": "marionette",
+  "version": "0.4.1",
+  "type": "module",
+  "pi": {
+    "skills": [
+      "./skills"
+    ],
+    "extensions": [
+      "./extensions/policy.js"
+    ]
+  }
+}
