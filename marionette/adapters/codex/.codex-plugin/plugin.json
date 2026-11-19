@@ -1,0 +1,6 @@
+{
+  "name": "marionette",
+  "version": "0.4.1",
+  "description": "Marionette \u2014 unified multi-host coordinator plugin",
+  "skills": "./skills/"
+}
