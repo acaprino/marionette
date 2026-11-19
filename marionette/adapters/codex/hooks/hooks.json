@@ -21,17 +21,6 @@
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python -c \"import base64,json,os,shutil,string,subprocess,sys;p=json.loads(base64.b64decode('eyJydW4iOiBbIm5vZGUiLCAiPHBhY2thZ2Vfcm9vdD4vc2NyaXB0cy90YXN0ZS1za2lsbC9zY3JpcHRzL2dhdGUubWpzIiwgIi0taG9vayIsICJjb2RleCJdLCAicm9vdCI6ICIke1BMVUdJTl9ST09UfS9za2lsbHMvbWFyaW9uZXR0ZSJ9'));root=string.Template(p['root']).substitute(os.environ);argv=[part.replace('<package_root>',root) for part in p['run']];program=shutil.which(argv[0]) or argv[0];sys.exit('Windows batch hooks require an explicit executable and script') if os.name=='nt' and os.path.splitext(program)[1].lower() in ('.bat','.cmd') else None;argv[0]=program;sys.exit(subprocess.run(argv,shell=False).returncode)\"",
-            "timeout": 600
-          }
-        ]
-      }
     ]
   }
 }

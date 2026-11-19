@@ -1,13 +1,13 @@
 ---
 name: marionette-web-design
-description: "Use when designing, building or restyling a website or landing page (offer, copy, outline, palette, fonts, layout), when asking which design system, palette, typography or accessibility and UX rules suit an app screen, dashboard or component, or when creating or updating designs, components and tokens inside a Figma file. Not for a clickable prototype of app screens in HTML. It replaces the absorbed taste-skill, design-taste-frontend, landing-page-design, figma-designer and ui-ux-pro-max: use this skill instead of them, also when the user names one of them."
+description: "Use when designing, building or restyling a website or landing page (offer, copy, outline, typeface, colours, layout), when asking which design system, palette, typography or accessibility and UX rules suit an app screen, dashboard or component, or when creating or updating designs, components and tokens inside a design tool's file (Figma, FigCraft or another canvas editor). Not for a clickable prototype of app screens in HTML. It replaces the absorbed landing-page-design, figma-designer and ui-ux-pro-max: use this skill instead of them, also when the user names one of them."
 user-invocable: false
 allowed-tools: Bash(python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py *) Bash(python "${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py" *) Read(${CLAUDE_PLUGIN_ROOT}/**) Read(/${CLAUDE_PLUGIN_ROOT}/**) Edit(./.marionette/**)
 ---
 
 # Marionette coordinator
 
-This is the Marionette entry for: Visual Direction (website and landing page), Design Guidance (local design-system search), Figma Design. It runs the same coordinator as the
+This is the Marionette entry for: Visual Direction (landing page and website), Design Guidance (local design-system search), Canvas Design. It runs the same coordinator as the
 `marionette` skill. Classify against the whole returned catalog: a request can
 also need capabilities outside this entry, and the catalog decides, not the entry.
 
@@ -20,7 +20,7 @@ host's permission rules match every call. `.marionette` is this coordinator's fo
 the current project; the runtime keeps it out of Git with its own `.gitignore`.
 
 1. Read the user's task and relevant project context. Run:
-   `python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py plan --compact --focus visual-direction,design-guidance,figma-design --task "<user task>" --project "<current project>"`.
+   `python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py plan --compact --focus visual-direction,design-guidance,canvas-design --task "<user task>" --project "<current project>"`.
 2. The result is `classification-required` with `context` and a compact `catalog`
    (empty fields are omitted). Entries marked `brief` index the capabilities
    outside the focus: a group of capability ids with what the group is for, or one
