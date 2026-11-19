@@ -1,0 +1,2 @@
+# A build is bound to its bytes (lock files, SHA-256 checks): Git never rewrites line endings here.
+* -text
