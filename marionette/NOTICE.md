@@ -1,18 +1,6 @@
-Marionette v0.4.1 — Aggregated NOTICE
+Marionette v0.5.0 — Aggregated NOTICE
 
 The following upstream works are adapted and merged into Marionette:
-
-- taste-skill — MIT (see LICENSES/taste-skill.txt)
-  Copyright (c) 2026 Leonxlnx
-  Modified and merged into Marionette.
-  Third-party notices for material included in this source: scripts/taste-skill/assets/photos/photos.json
-  Third-party notices for material included in this source: scripts/taste-skill/assets/layout/img/credits.json
-  Third-party notices for material included in this source: scripts/taste-skill/assets/moments/_demo/credits.json
-  Third-party notices for material included in this source: scripts/taste-skill/assets/scenes/_demo/credits.json
-  Third-party notices for material included in this source: scripts/taste-skill/assets/objects/photo-kit/photos.json
-  Third-party notices for material included in this source: scripts/taste-skill/assets/components/fx-photo/meta.json
-  Third-party notices for material included in this source: scripts/taste-skill/assets/ui/icons/icons-credits.json
-  Third-party notices for material included in this source: scripts/taste-skill/assets/icons/demo/icons-credits.json
 
 - motion-design — MIT (see LICENSES/motion-design.txt)
   Copyright (c) 2025 LottieFiles
@@ -135,7 +123,7 @@ and development tooling and are not shipped in the application.
 
 Runtime Dependencies (Not Bundled):
   - gsap (3): GSAP Standard License (target project dependency, not bundled by Muro)
-  - Figma MCP and figma-use (): External host integration, not bundled by Muro
+  - A design tool integration of the host: Figma MCP with figma-use, FigCraft's MCP server, or another canvas editor's (): External host integration, not bundled by Muro
   - Python 3.10+ (standard library) (): PSF runtime prerequisite, not bundled by Muro
   - GenOffice desktop app with its genoffice command line (>=0.9.0): Apache-2.0 (external application, not bundled by Muro; installed at runtime from the official releases when missing)
   - uv, or Python 3.11+ (standard library; optional truststore) (): External runtime, not bundled by Muro; installed at runtime from astral.sh when missing and wanted
