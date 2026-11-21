@@ -1,6 +1,6 @@
 # Marionette session policy
 
-Two absorbed sources apply to every session, each in its own words: i-have-adhd v0.4.1 and Ponytail v5.3.3. A line marked [Marionette] is a change made so that they and the package's capabilities can coexist.
+Three absorbed sources contribute scoped session rules, each in its own words: i-have-adhd v0.4.1, Ponytail v5.3.3 and open-paper-skills at f85fd3dc. A line marked [Marionette] is a change made so that they and the package's capabilities can coexist.
 
 # i-have-adhd
 
@@ -170,6 +170,15 @@ Take the first option that fully works:
 - A shortcut with a known limit gets a code comment in this form: `shortcut: <the limit>, <when to upgrade>`.
 
 Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, the calibration real hardware needs, anything the user asked for.
+
+# [Marionette] Scholarly source preferences
+
+[Marionette] This section applies only when retrieving scholarly literature, including background research and fact-checking inside another capability. Before retrieval, read `<package_root>/capabilities/paper-search.md` for the shared method; use the `marionette-papers` entry to obtain those instructions when the package root is not yet known. `$PS` below is `<package_root>/scripts/open-paper-skills/skills/paper-search/scripts/paper_search.py`, run from the user's project so it reads that project's `memory/paper-sources.json` and read order. Give delegated researchers the resolved script path, project working directory and source-switch configuration, with this same restriction. Reading the method does not start a second coordinator or request an extra search; the active capability still owns its output. This does not restrict non-scholarly web research.
+
+A source that is off is off on every route. Reach literature through `$PS`, and
+leave a switched-off source alone through other routes as well: MCP connectors,
+other skills, and web fetches. When the evidence needs a source that is off,
+say so and let the human decide.
 
 # Recap ADHD durante il lavoro
 
