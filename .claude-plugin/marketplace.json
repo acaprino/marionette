@@ -1,0 +1,17 @@
+{
+  "name": "marionette",
+  "owner": {
+    "name": "Muro contributors"
+  },
+  "metadata": {
+    "description": "Marionette, installed from this folder"
+  },
+  "plugins": [
+    {
+      "name": "marionette",
+      "source": "./marionette/adapters/claude-code",
+      "description": "Marionette \u2014 unified multi-host coordinator plugin",
+      "version": "0.6.0"
+    }
+  ]
+}

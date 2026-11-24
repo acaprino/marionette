@@ -2,14 +2,15 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import shutil
 
-from .delivery import DELIVERY_FILE, claude_code_hooks, codex_hooks, install_note, session_text
+from .delivery import (DELIVERY_FILE, PACKAGE_SERVER_FILE, agent_plugins_mcp, claude_code_hooks, claude_code_mcp,
+                       codex_hooks, install_note, mcp_servers, placeholder_launches, session_text)
 from .custom_instructions import DIRECTORY as CUSTOM_DIRECTORY, RECEIPT as CUSTOM_RECEIPT
 from .entries import ENTRIES_FILE, entry_description
 from .claude_adapter import write_claude_policy
-from .hermes_adapter import write_hermes_adapter
+from .hermes_adapter import write_hermes_adapter, write_hermes_servers
 from .native_policy import write_opencode_adapter, write_pi_adapter
 
 
@@ -22,6 +23,11 @@ sys.path.insert(0, str(package))
 from muro.runtime import runtime_main
 raise SystemExit(runtime_main(["--package", str(package), *sys.argv[1:]]))
 '''
+
+# The marketplace file of each host that has one, from the folder that is the marketplace. Every
+# adapter folder is its own marketplace (`write_adapters`); a repository that publishes a release in
+# a subfolder gets one at its root (`write_repository_marketplaces`).
+MARKETPLACE_FILES = {"claude-code": ".claude-plugin/marketplace.json", "codex": ".agents/plugins/marketplace.json"}
 
 
 def _skill_description(plugin: dict, capabilities: list | None = None, entries: list | None = None) -> str:
@@ -297,6 +303,8 @@ def write_adapters(dist: Path, plugin: dict, package_source: Path, capabilities:
         shutil.copy2(dist / "guide-examples.json", skill_dir / "guide-examples.json")
         if (dist / DELIVERY_FILE).is_file():
             shutil.copy2(dist / DELIVERY_FILE, skill_dir / DELIVERY_FILE)
+        if (dist / PACKAGE_SERVER_FILE).is_file():
+            shutil.copy2(dist / PACKAGE_SERVER_FILE, skill_dir / PACKAGE_SERVER_FILE)
         if (dist / CUSTOM_RECEIPT).is_file():
             shutil.copy2(dist / CUSTOM_RECEIPT, skill_dir / CUSTOM_RECEIPT)
         if (dist / CUSTOM_DIRECTORY).is_dir():
@@ -343,7 +351,7 @@ def write_adapters(dist: Path, plugin: dict, package_source: Path, capabilities:
                            "metadata": {"description": f"{plugin['name']}, installed from this folder"},
                            "plugins": [{"name": plugin["slug"], "source": "./",
                                         "description": plugin_doc["description"], "version": plugin["version"]}]}
-            (root / ".claude-plugin" / "marketplace.json").write_text(json.dumps(marketplace, indent=2), encoding="utf-8")
+            (root / MARKETPLACE_FILES[host]).write_text(json.dumps(marketplace, indent=2), encoding="utf-8")
             # Installing the plugin is the consent: what delivery.json declares is registered when it is enabled.
             registered = claude_code_hooks(delivery, plugin["command"], plugin["name"])
             module = write_claude_policy(root, plugin)
@@ -353,6 +361,9 @@ def write_adapters(dist: Path, plugin: dict, package_source: Path, capabilities:
             if registered:
                 (root / "hooks").mkdir(exist_ok=True)
                 (root / "hooks" / "hooks.json").write_text(json.dumps(registered, indent=2), encoding="utf-8")
+            servers = claude_code_mcp(delivery, plugin["command"])
+            if servers:
+                (root / ".mcp.json").write_text(json.dumps(servers, indent=2), encoding="utf-8")
         elif host == "codex":
             # Both modern and compatibility entrypoints refer to the same packaged resources.
             portable = {"$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
@@ -368,16 +379,56 @@ def write_adapters(dist: Path, plugin: dict, package_source: Path, capabilities:
                            "plugins": [{"name": plugin["slug"], "source": {"source": "local", "path": "./"},
                                         "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
                                         "category": "Productivity"}]}
-            (root / ".agents" / "plugins").mkdir(parents=True)
-            (root / ".agents" / "plugins" / "marketplace.json").write_text(json.dumps(marketplace, indent=2),
-                                                                         encoding="utf-8")
+            (root / MARKETPLACE_FILES[host]).parent.mkdir(parents=True)
+            (root / MARKETPLACE_FILES[host]).write_text(json.dumps(marketplace, indent=2), encoding="utf-8")
             registered = codex_hooks(delivery, plugin["command"], plugin["name"])
             if registered:
                 (root / "hooks").mkdir()
                 (root / "hooks/hooks.json").write_text(json.dumps(registered, indent=2), encoding="utf-8")
+            # Beside the root Agent Plugins manifest written above, which is where Codex looks for it.
+            servers = agent_plugins_mcp(delivery, f"${{PLUGIN_ROOT}}/skills/{plugin['command']}")
+            if servers:
+                (root / "mcp.json").write_text(json.dumps(servers, indent=2), encoding="utf-8")
         elif host == "pi":
-            write_pi_adapter(root, plugin, bool(policy))
+            write_pi_adapter(root, plugin, bool(policy), placeholder_launches(delivery))
         elif host == "opencode":
-            write_opencode_adapter(root, plugin, bool(policy))
+            write_opencode_adapter(root, plugin, bool(policy), placeholder_launches(delivery))
         elif host == "hermes":
             write_hermes_adapter(root, plugin, bool(policy))
+            servers = agent_plugins_mcp(delivery, "${PLUGIN_ROOT}")
+            if servers:
+                write_hermes_servers(dist / "adapters" / "hermes-mcp", plugin, servers, dist,
+                                     {server["source"] for server in mcp_servers(delivery)})
+
+
+def _repository_source(source, adapter: PurePosixPath):
+    """A marketplace entry's local source, relative to its adapter folder, made relative to the repository."""
+    if isinstance(source, dict) and source.get("source") == "local" and isinstance(source.get("path"), str):
+        return {**source, "path": _repository_source(source["path"], adapter)}
+    if isinstance(source, str) and source.startswith("."):
+        return f"./{(adapter / source).as_posix()}"
+    raise ValueError(f"{adapter}: a plugin source a Muro build does not write: {source!r}")
+
+
+def write_repository_marketplaces(repository: Path, folder: str) -> list[Path]:
+    """Write, at the root of `repository`, the marketplace of each host that has one, for the release
+    published in its subfolder `folder`: the adapter's own marketplace, with each plugin's source moved
+    to the adapter folder. A host, and Muro's desktop app, then find the plugin from the repository's
+    address. Every file is read before any is written: a folder without a release writes nothing."""
+    relative = Path(folder)
+    if not folder or relative.anchor or any(part in (".", "..") for part in relative.parts):
+        raise ValueError(f"{folder!r} is not a folder inside the repository")
+    documents = {}
+    for host, name in MARKETPLACE_FILES.items():
+        adapter = PurePosixPath(*relative.parts, "adapters", host)
+        source = repository / adapter.as_posix() / name
+        if not source.is_file():
+            raise ValueError(f"{source} is missing: {folder} holds no {host} adapter of a built release")
+        document = json.loads(source.read_text(encoding="utf-8"))
+        document["plugins"] = [{**entry, "source": _repository_source(entry.get("source"), adapter)}
+                               for entry in document.get("plugins") or []]
+        documents[repository / name] = document
+    for path, document in documents.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(document, indent=2), encoding="utf-8")
+    return list(documents)

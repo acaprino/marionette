@@ -1,0 +1,20 @@
+{
+  "name": "marionette",
+  "interface": {
+    "displayName": "Marionette"
+  },
+  "plugins": [
+    {
+      "name": "marionette",
+      "source": {
+        "source": "local",
+        "path": "./marionette/adapters/codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

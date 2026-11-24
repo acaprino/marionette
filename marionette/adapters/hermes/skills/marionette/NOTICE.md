@@ -1,4 +1,4 @@
-Marionette v0.5.1 — Aggregated NOTICE
+Marionette v0.6.0 — Aggregated NOTICE
 
 The following upstream works are adapted and merged into Marionette:
 
@@ -120,6 +120,10 @@ and development tooling and are not shipped in the application.
   Copyright (c) 2025 Alfio
   Modified and merged into Marionette.
   Third-party notices for material included in this source: scripts/text-humanizer/skills/humanize/references/upstream-license.txt
+
+- better-layout — MIT (see LICENSES/better-layout.txt)
+  Copyright (c) 2026 Jakub Krehel
+  Modified and merged into Marionette.
 
 Runtime Dependencies (Not Bundled):
   - gsap (3): GSAP Standard License (target project dependency, not bundled by Muro)

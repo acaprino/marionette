@@ -1,6 +1,6 @@
 {
   "name": "marionette",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Marionette - unified multi-host coordinator plugin",
   "author": "Muro contributors"
 }
