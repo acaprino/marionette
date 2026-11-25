@@ -1,4 +1,4 @@
-"""Release decisions at the Muro / Marionette repository boundary."""
+"""Release decisions of this repository: when a version is built, and how its pull request is prepared."""
 import json
 import os
 import runpy
@@ -11,24 +11,28 @@ import pytest
 from test_cli import git
 
 ROOT = Path(__file__).resolve().parents[1]
-MANIFEST = "examples/marionette/sources.json"
-WORKFLOW = ROOT / ".github/workflows/release-marionette.yml"
+MURO_ROOT = Path(os.environ["MURO_ROOT"]).resolve()
+MANIFEST = "source/sources.json"
+WORKFLOWS = ROOT / ".github/workflows"
+WORKFLOW = WORKFLOWS / "prepare-release.yml"
 
 
 @pytest.fixture
 def release_version():
-    return runpy.run_path(str(ROOT / ".github/scripts/marionette_release.py"))["release_version"]
+    return runpy.run_path(str(ROOT / ".github/scripts/release_version.py"))["release_version"]
 
 
 @pytest.fixture
 def remotes(tmp_path, monkeypatch):
-    factory, package = tmp_path / "muro", tmp_path / "marionette"
-    for repo in (factory, package):
+    # The package's repository, where the manifest lives and the tags are published, and the factory's, which
+    # holds the tags of the first versions.
+    package, factory = tmp_path / "marionette", tmp_path / "muro"
+    for repo in (package, factory):
         repo.mkdir()
         git(repo, "init", "-q")
         git(repo, "commit", "-qm", "Empty repository", "--allow-empty")
-    monkeypatch.chdir(factory)
-    return [bundle_remote(repo) for repo in (factory, package)]
+    monkeypatch.chdir(package)
+    return [bundle_remote(repo) for repo in (package, factory)]
 
 
 def bundle_remote(repo):
@@ -62,7 +66,7 @@ def test_first_manifest_new_ref_and_manual_dispatch_can_build(release_version, r
         assert release_version(MANIFEST, before, remotes) == "0.5.1"
 
 
-@pytest.mark.parametrize("repository", [0, 1], ids=["historical-factory-tag", "package-tag"])
+@pytest.mark.parametrize("repository", [0, 1], ids=["package-tag", "historical-factory-tag"])
 def test_published_version_is_a_noop_for_push_and_manual_dispatch(release_version, remotes, repository):
     previous = commit_manifest("0.5.0")
     commit_manifest("0.5.1")
@@ -102,15 +106,32 @@ def test_workflow_runs_the_planner_for_every_main_push_and_gates_publication():
     assert {"push:", "branches: [main]", "workflow_dispatch:"} <= set(trigger_fields)
     assert not any(line.startswith(("paths:", "paths-ignore:")) for line in trigger_fields)
     plan, release = workflow.split("\n  release:\n", 1)
-    assert "python3 .github/scripts/marionette_release.py" in plan
+    assert "python3 .github/scripts/release_version.py" in plan
     assert "needs: plan" in release and "if: needs.plan.outputs.build == 'true'" in release
-    assert "git push" in release and "MARIONETTE_DEPLOY_KEY" in release
+    # The pull request is opened by the job that pushes: a push with the workflow's token starts no workflow.
+    assert "git push" in release and "gh pr create" in release
+    assert "contents: write" in release and "pull-requests: write" in release
+    assert "contents: write" not in plan and "pull-requests: write" not in plan
+
+
+def test_no_workflow_uses_a_secret_and_the_factory_ref_is_kept_in_one_file():
+    assert len((ROOT / "MURO_REF").read_text(encoding="utf-8").split()) == 1
+    read_ref = "run: echo \"ref=$(tr -d '[:space:]' < MURO_REF)\" >> \"$GITHUB_OUTPUT\""
+    factory_checkouts = []
+    for path in sorted(WORKFLOWS.glob("*.yml")):
+        workflow = path.read_text(encoding="utf-8")
+        assert "secrets." not in workflow, path.name
+        refs = [line.strip() for line in workflow.splitlines() if line.strip().startswith("ref:")]
+        if refs:
+            assert refs == ["ref: ${{ steps.muro.outputs.ref }}"] and workflow.count(read_ref) == 1, path.name
+            factory_checkouts.append(path.name)
+    assert factory_checkouts == ["package.yml", "prepare-release.yml"]
 
 
 @pytest.mark.skipif(os.name == "nt", reason="the publication step runs in Bash on the Linux Actions runner")
 def test_replaying_the_publication_step_preserves_the_open_pr_head(tmp_path):
     workflow = WORKFLOW.read_text(encoding="utf-8")
-    step = workflow.split("      - name: Push the build to the release branch\n", 1)[1]
+    step = workflow.split("      - name: Push the release branch and open its pull request\n", 1)[1]
     script = textwrap.dedent(step.split("        run: |\n", 1)[1].split("\n      - ", 1)[0])
     tag = "marionette-v0.5.1"
     branch = f"release/{tag}"
@@ -124,7 +145,7 @@ def test_replaying_the_publication_step_preserves_the_open_pr_head(tmp_path):
     staged.mkdir(parents=True)
     (staged / "sources.json").write_text('{"plugin":{"version":"0.5.1"}}', encoding="utf-8")
     # The adapters' own marketplaces, from which the step writes the repository's root ones with the
-    # factory of the Muro checkout ($GITHUB_WORKSPACE).
+    # factory of the Muro checkout ($MURO_ROOT).
     for relative, source in ((".claude-plugin/marketplace.json", "./"),
                              (".agents/plugins/marketplace.json", {"source": "local", "path": "./"})):
         host = "claude-code" if relative.startswith(".claude") else "codex"
@@ -132,14 +153,22 @@ def test_replaying_the_publication_step_preserves_the_open_pr_head(tmp_path):
         path.parent.mkdir(parents=True)
         path.write_text(json.dumps({"name": "marionette", "plugins": [{"name": "marionette", "source": source}]}),
                         encoding="utf-8")
-    (tmp_path / "muro").symlink_to(ROOT / "muro", target_is_directory=True)
-    summary = tmp_path / "summary"
-    env = dict(os.environ, GITHUB_REPOSITORY="acaprino/muro", GITHUB_SHA="a" * 40,
+    summary, calls = tmp_path / "summary", tmp_path / "gh-calls"
+    env = dict(os.environ, GITHUB_REPOSITORY="acaprino/marionette", GITHUB_SHA="a" * 40,
                PKG_TAG=tag, PKG_VERSION="0.5.1", MANIFEST=MANIFEST, RUNNER_TEMP=str(tmp_path),
-               PACKAGE_REPOSITORY="acaprino/marionette", GITHUB_API_URL="https://github.invalid",
-               GITHUB_WORKSPACE=str(tmp_path), GITHUB_STEP_SUMMARY=str(summary))
-    # Git, staging, commits and pushes are real. Only the open PR's HTTP response is a fixture.
-    response = """curl() { printf '[{"number":7}]'; }\n"""
+               MURO_REPOSITORY="acaprino/muro", MURO_ROOT=str(MURO_ROOT), GITHUB_SERVER_URL="https://github.invalid",
+               GITHUB_WORKSPACE=str(tmp_path), GITHUB_STEP_SUMMARY=str(summary), GH_CALLS=str(calls))
+    # Git, staging, commits and pushes are real. Only GitHub's side is a fixture: no pull request is open
+    # until the step creates one, which is then number 7.
+    response = textwrap.dedent("""\
+        gh() {
+          if [ "$1 $2" = "pr list" ]; then
+            if [ -f "$GH_CALLS" ]; then echo 7; fi
+          else
+            echo "$*" >> "$GH_CALLS"
+          fi
+        }
+        """)
     for attempt in ("first", "replay"):
         checkout = tmp_path / attempt
         git(tmp_path, "clone", str(remote), str(checkout))
@@ -153,4 +182,7 @@ def test_replaying_the_publication_step_preserves_the_open_pr_head(tmp_path):
             assert claude["plugins"][0]["source"] == "./marionette/adapters/claude-code"
             assert codex["plugins"][0]["source"]["path"] == "./marionette/adapters/codex"
     assert git(remote, "rev-parse", branch) == release_head
-    assert "/pull/7" in summary.read_text()
+    assert "/pull/7" in summary.read_text() and "Already prepared" in summary.read_text()
+    # The pull request was opened once, by the first run, with the notes as its text.
+    assert calls.read_text().splitlines() == [
+        f"pr create --base main --head {branch} --title Marionette 0.5.1 --body-file releases/{tag}.md"]

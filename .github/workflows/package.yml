@@ -1,0 +1,67 @@
+name: Package
+
+# The checks of the package source, run on the same commit: the tests, the manifest validated, its pinned sources
+# checked against their remotes, and the package built. The factory is Muro (acaprino/muro, public), checked out
+# at the ref written in the file MURO_REF: that file is the one place where the ref is kept, for this workflow
+# and for prepare-release.yml. A problem of a source (one that moved, a pin that no longer matches) fails here.
+# Runs when what the package is made of changes, or by hand (`gh workflow run package.yml --ref <branch>`).
+on:
+  push:
+    paths:
+      - source/**
+      - tests/**
+      - docs/releases/**
+      - MURO_REF
+      - .github/scripts/**
+      - .github/workflows/package.yml
+      - .github/workflows/prepare-release.yml
+  pull_request:
+    paths:
+      - source/**
+      - tests/**
+      - docs/releases/**
+      - MURO_REF
+      - .github/scripts/**
+      - .github/workflows/package.yml
+      - .github/workflows/prepare-release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: package-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MANIFEST: source/sources.json
+  MURO_REPOSITORY: acaprino/muro
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: muro
+        name: Read the pinned Muro ref
+        run: echo "ref=$(tr -d '[:space:]' < MURO_REF)" >> "$GITHUB_OUTPUT"
+      # The folder is not named muro: that is the name of the Python package inside it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ env.MURO_REPOSITORY }}
+          ref: ${{ steps.muro.outputs.ref }}
+          path: factory
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Test
+        run: |
+          python -m pip install pytest
+          MURO_ROOT="$GITHUB_WORKSPACE/factory" python -m pytest -q -rf --tb=short tests
+      - name: Validate, check sources and build
+        if: always()
+        run: |
+          python factory/muro_build.py --manifest "$MANIFEST" --validate
+          python factory/muro_build.py --manifest "$MANIFEST" --check-sources
+          python factory/muro_build.py --manifest "$MANIFEST" --build --out "$RUNNER_TEMP/stage"
