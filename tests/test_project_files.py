@@ -1,14 +1,13 @@
 """The project files Marionette keeps beside its package (ADR-0028, decision 5: Marionette is the default project).
 
-`examples/marionette/` carries the project's own files beside the package: `project.json`, `records.json`,
+`source/` carries the project's own files beside the package: `project.json`, `records.json`,
 `history.json` and `CHANGELOG.md`. What they contain is checked for consistency (a run has its release note, a
 changelog entry a title and a text, a record's date is its own text's); never for completeness and never for
 equality with what the package or a note says now, so a release made by someone else, a note without a run, an
 edited note or router bullet, a removed source or capability fails nothing here: they are history.
 The version lives once, in `sources.json`: `muro project pack` writes it into the packed `project.json`.
 The subjects of a record are an AI judgment and may name what the package no longer has.
-Muro's release does not build or pack this project: `scripts/desktop_resources.py` takes the latest published release
-of Marionette (see `tests/test_desktop_resources.py`). `muro project pack` is still the way to make the project file.
+`muro project pack` is the way to make the project file.
 """
 import json
 import re
@@ -18,10 +17,9 @@ from muro import project
 from muro.cli import main
 from muro.core import parse_router
 from muro.sources import license_files, notice_paths
-from routing_helpers import ROOT
 
-PACKAGE = ROOT / "examples" / "marionette"
-RELEASES = ROOT / "docs" / "releases"
+PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+RELEASES = PACKAGE.parent / "docs" / "releases"  # the notes of each version, in this repository
 DAY = re.compile(r"\d{4}-\d{2}-\d{2}")
 UTC_TIME = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 COMMIT = re.compile(r"[0-9a-f]{40}")

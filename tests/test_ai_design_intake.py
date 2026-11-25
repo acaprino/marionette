@@ -4,8 +4,7 @@ from pathlib import Path
 
 from muro import check_sources, parse_capabilities, parse_router
 
-ROOT = Path(__file__).resolve().parent.parent
-PACKAGE = ROOT / "examples" / "marionette"  # the example plugin the factory builds
+PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
 
 
 def test_ai_design_skills_manifest_is_mit_and_scoped_to_text():

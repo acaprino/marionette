@@ -13,11 +13,10 @@ import pytest
 from muro import parse_capabilities
 from muro.delivery import ALWAYS_ON_PER_SOURCE, always_on_limit, validate_delivery
 from muro.runtime import Coordinator
-from routing_helpers import decision
+from routing_helpers import ROOT, decision
 
 
-ROOT = Path(__file__).resolve().parent.parent
-PACKAGE = ROOT / "examples" / "marionette"
+PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
 SOURCE = "i-have-adhd"
 COMMIT = "1ecea1993b7fce257ffbd686c070948b5e07eda6"
 CANONICAL = "skills/i-have-adhd/SKILL.md"

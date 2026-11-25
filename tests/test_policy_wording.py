@@ -17,8 +17,7 @@ import pytest
 from muro.delivery import always_on_limit
 from muro.sources import _blob, source_repository
 
-ROOT = Path(__file__).resolve().parent.parent
-PACKAGE = ROOT / "examples" / "marionette"
+PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
 MARK = "[Marionette]"
 # The one sentence of a source that is reworded: it claims the end of the reply, as i-have-adhd rule 3 does.
 PONYTAIL_ENDING = "End your reply with one or two lines: what you skipped or did not check, and any risk the user must know."

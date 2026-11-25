@@ -1,0 +1,6 @@
+# Anchored on purpose: marionette/ is a build and every one of its files is published, whatever its name.
+# The checkout of Muro that the workflows make (see MURO_REF).
+/factory/
+/.pytest_cache/
+/tests/__pycache__/
+/.github/scripts/__pycache__/

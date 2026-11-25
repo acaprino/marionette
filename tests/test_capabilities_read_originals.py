@@ -14,8 +14,7 @@ import pytest
 
 from muro.release import build_release
 
-ROOT = Path(__file__).resolve().parent.parent
-PACKAGE = ROOT / "examples" / "marionette"
+PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
 CAPABILITIES = sorted((PACKAGE / "capabilities").glob("*.md"))
 ALIAS = re.compile(r"`(<[A-Z]{2,3}>|\$[A-Z]{2,3})`(?: below)?(?: stands)? (?:is|for) `(<package_root>/scripts/[^`]+)`")
 NAMED = re.compile(r"<package_root>/scripts/([A-Za-z0-9_.{}*/-]+)")

@@ -15,10 +15,9 @@ import pytest
 from muro import build_release, parse_capabilities, parse_router
 from muro.entries import validate_entries
 from muro.runtime import Coordinator
-from routing_helpers import copy_delivery, decision
+from routing_helpers import ROOT, copy_delivery, decision
 
-ROOT = Path(__file__).resolve().parent.parent
-PACKAGE = ROOT / "examples" / "marionette"
+PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
 COMMIT = "ec8ff5ec7ed5924520ee71b705a920ee64fe2918"
 HELPERS = "<package_root>/scripts/tokeneconomizer"
 EVENTS = ["SessionStart", "UserPromptSubmit", "PostToolUse", "PostToolUseFailure", "Stop", "SessionEnd"]

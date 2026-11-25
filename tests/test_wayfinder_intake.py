@@ -13,7 +13,7 @@ import pytest
 from muro.sources import _covers, parse_capabilities
 
 
-PACKAGE = Path(__file__).resolve().parent.parent / 'examples' / 'marionette'
+PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
 PIN = 'd1478fcb140db0b93c0c8df17bcfd311844749d0'
 REQUIRED = (
     'skills/productivity/grilling/SKILL.md',

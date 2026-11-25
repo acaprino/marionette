@@ -17,10 +17,9 @@ import pytest
 from muro import parse_capabilities, parse_router
 from muro.entries import validate_entries
 from muro.runtime import Coordinator
-from routing_helpers import copy_delivery, decision
+from routing_helpers import ROOT, copy_delivery, decision
 
-ROOT = Path(__file__).resolve().parent.parent
-PACKAGE = ROOT / "examples" / "marionette"
+PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
 COMMIT = "f85fd3dc80720dfa42fb5ab069f232f28c831109"
 HELPERS = "<package_root>/scripts/open-paper-skills/skills"
 KEPT = {

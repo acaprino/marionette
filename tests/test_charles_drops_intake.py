@@ -16,11 +16,10 @@ import pytest
 from muro import parse_capabilities, parse_router
 from muro.entries import validate_entries
 from muro.runtime import Coordinator
-from routing_helpers import decision
+from routing_helpers import ROOT, decision
 
 
-ROOT = Path(__file__).resolve().parent.parent
-PACKAGE = ROOT / "examples" / "marionette"
+PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
 SOURCE = "charles-skills"
 COMMIT = "83de509dd10b77ebaf83c3f9986b538cdaf19b63"
 DROPS = "skills/drops"

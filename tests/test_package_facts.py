@@ -16,11 +16,10 @@ from muro.adapters import _skill
 from muro.delivery import validate_delivery
 from muro.entries import validate_entries
 from muro.runtime import Coordinator
-from routing_helpers import copy_delivery, copy_prompts, proposed
+from routing_helpers import ROOT, copy_delivery, copy_prompts, proposed
 from test_audit_host import INLINE_LIMIT, packaged, run
 
-ROOT = Path(__file__).resolve().parent.parent
-MARIONETTE = ROOT / "examples" / "marionette"
+MARIONETTE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
 PACKAGE = MARIONETTE
 
 

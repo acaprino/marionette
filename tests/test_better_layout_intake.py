@@ -15,11 +15,10 @@ from muro import parse_capabilities, parse_router
 from muro.delivery import validate_delivery
 from muro.entries import validate_entries
 from muro.runtime import Coordinator
-from routing_helpers import decision
+from routing_helpers import ROOT, decision
 
 
-ROOT = Path(__file__).resolve().parent.parent
-PACKAGE = ROOT / "examples" / "marionette"
+PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
 SOURCE = "better-layout"
 COMMIT = "672ae44ace6aaed65b86cbb1e2fd6fbea0e79578"
 CAPABILITY = "layout-structure"
