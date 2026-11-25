@@ -1,13 +1,13 @@
 ---
 name: marionette-motion
-description: "Use when deciding how an interface moves (purpose, durations, easing, choreography, reduced-motion alternatives), when asking for a rendered animation file (MP4, GIF, WebM, dotLottie, Lottie JSON) or when implementing scroll-linked animation, pinning, scrub, parallax or horizontal scroll sections with GSAP ScrollTrigger or pure CSS scroll-driven timelines. It replaces the absorbed motion-design and gsap-scrolltrigger: use this skill instead of them, also when the user names one of them."
+description: "Use when deciding how an interface moves (purpose, durations, easing, choreography, reduced-motion alternatives), when adding or reviewing animation, transitions, press and hover feedback, loading and optimistic states in the project's code (modals, drawers, popovers, toasts, icon swaps, async buttons), when asking for a rendered animation file (MP4, GIF, WebM, dotLottie, Lottie JSON) or when implementing scroll-linked animation, pinning, scrub, parallax or horizontal scroll sections with GSAP ScrollTrigger or pure CSS scroll-driven timelines. Not for finishing a whole screen with its motion checked frame by frame (polish). It replaces the absorbed motion-design, gsap-scrolltrigger and charles-ux-animation: use this skill instead of them, also when the user names one of them."
 user-invocable: false
 allowed-tools: Bash(python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py *) Bash(python "${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py" *) Read(${CLAUDE_PLUGIN_ROOT}/**) Read(/${CLAUDE_PLUGIN_ROOT}/**) Edit(./.marionette/**)
 ---
 
 # Marionette coordinator
 
-This is the Marionette entry for: Motion Principles, GSAP ScrollTrigger Implementation, CSS Scroll Animation (No-JS Variant). It runs the same coordinator as the
+This is the Marionette entry for: Motion Principles, Interaction Motion (build and review how an interface moves and responds), GSAP ScrollTrigger Implementation, CSS Scroll Animation (No-JS Variant). It runs the same coordinator as the
 `marionette` skill. Classify against the whole returned catalog: a request can
 also need capabilities outside this entry, and the catalog decides, not the entry.
 
@@ -20,7 +20,7 @@ host's permission rules match every call. `.marionette` is this coordinator's fo
 the current project; the runtime keeps it out of Git with its own `.gitignore`.
 
 1. Read the user's task and relevant project context. Run:
-   `python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py plan --compact --focus motion-principles,gsap-scrolltrigger,css-scroll --task "<user task>" --project "<current project>"`.
+   `python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py plan --compact --focus motion-principles,interaction-motion,gsap-scrolltrigger,css-scroll --task "<user task>" --project "<current project>"`.
 2. The result is `classification-required` with `context` and a compact `catalog`
    (empty fields are omitted). Entries marked `brief` index the capabilities
    outside the focus: a group of capability ids with what the group is for, or one
