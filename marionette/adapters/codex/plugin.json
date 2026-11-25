@@ -1,6 +1,6 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "marionette",
-  "version": "0.5.1",
+  "version": "0.7.0",
   "description": "Marionette \u2014 unified multi-host coordinator plugin"
 }

@@ -1,11 +1,11 @@
 ---
 name: marionette-design-review
-description: "Use when checking and fixing an existing HTML design or web interface before it is shown or shipped: accessibility (contrast, keyboard, focus, labels), a generic AI-made look, visual hierarchy and spacing rhythm, missing hover, focus, disabled or loading states, or a full polish pass; or when extracting design tokens from a brand, codebase, site or screenshots into a tokens file, or listing the reusable components of a design as an inventory. Not for a code review of logic, for fact-checking content or for changes inside a design tool's file (Figma, FigCraft). It replaces the absorbed accessibility-audit, ai-slop-check, hierarchy-rhythm-review, interaction-states-pass, polish-pass, design-system-extract and component-extract: use this skill instead of them, also when the user names one of them."
+description: "Use when checking and fixing an existing HTML design or web interface before it is shown or shipped: accessibility (contrast, keyboard, focus, labels), a generic AI-made look, visual hierarchy and spacing rhythm, missing hover, focus, disabled or loading states, or a full polish pass; or setting or reviewing a layout in code (narrow and mobile viewports, RTL, translated text); or when extracting design tokens from a brand, codebase, site or screenshots into a tokens file, or listing the reusable components of a design as an inventory. Not for a code review of logic, for fact-checking content or for changes inside a design tool's file (Figma, FigCraft). It replaces the absorbed accessibility-audit, ai-slop-check, hierarchy-rhythm-review, interaction-states-pass, polish-pass, design-system-extract, component-extract and better-layout: use this skill instead of them, also when the user names one of them."
 ---
 
 # Marionette coordinator
 
-This is the Marionette entry for: Design Review (audit and fix), Design System Extract (tokens and component inventory). It runs the same coordinator as the
+This is the Marionette entry for: Design Review (audit and fix), Layout Structure (build, repair and review), Design System Extract (tokens and component inventory). It runs the same coordinator as the
 `marionette` skill. Classify against the whole returned catalog: a request can
 also need capabilities outside this entry, and the catalog decides, not the entry.
 
@@ -18,7 +18,7 @@ host's permission rules match every call. `.marionette` is this coordinator's fo
 the current project; the runtime keeps it out of Git with its own `.gitignore`.
 
 1. Read the user's task and relevant project context. Run:
-   `python <skill-directory>/../marionette/muro.py plan --compact --focus design-review,design-system-extract --task "<user task>" --project "<current project>"`.
+   `python <skill-directory>/../marionette/muro.py plan --compact --focus design-review,layout-structure,design-system-extract --task "<user task>" --project "<current project>"`.
 2. The result is `classification-required` with `context` and a compact `catalog`
    (empty fields are omitted). Entries marked `brief` index the capabilities
    outside the focus: a group of capability ids with what the group is for, or one
