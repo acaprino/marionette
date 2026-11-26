@@ -39,8 +39,8 @@ The same job rehearsed what the store's gate runs, on the new file:
 ## The release run
 
 `gate` and `publish` passed at the first run. The generated commit changed no file mode (126 executable files
-in `marionette/` before and after) and touched only `marionette/`, the two marketplaces and
-`releases/marionette-v0.7.1.md`. The release has `marionette.mp`, `marionette-0.7.1.zip` and the `.sha256` of
+in `marionette/` before and after) and touched only `marionette/`, `.claude-plugin/marketplace.json` and
+`releases/marionette-v0.7.1.md` (the Codex marketplace was written again and came out the same). The release has `marionette.mp`, `marionette-0.7.1.zip` and the `.sha256` of
 each; the SHA-256 of the released `marionette.mp` is the one above.
 
 ## Not run
