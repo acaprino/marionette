@@ -1,4 +1,4 @@
-Marionette v0.7.0 — Aggregated NOTICE
+Marionette v0.7.1 — Aggregated NOTICE
 
 The following upstream works are adapted and merged into Marionette:
 

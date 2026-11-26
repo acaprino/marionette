@@ -11,7 +11,7 @@
       "name": "marionette",
       "source": "./marionette/adapters/claude-code",
       "description": "Marionette \u2014 unified multi-host coordinator plugin",
-      "version": "0.7.0"
+      "version": "0.7.1"
     }
   ]
 }
