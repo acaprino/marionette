@@ -19,7 +19,7 @@ from muro.runtime import Coordinator
 from routing_helpers import ROOT, decision
 
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 SOURCE = "text-humanizer"
 COMMIT = "c4d8276cd0c7dea91a60c9ba49431785d07aea1c"
 CAPABILITY = "text-humanize"

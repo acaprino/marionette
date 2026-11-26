@@ -21,7 +21,7 @@ from muro.delivery import validate_delivery
 from muro.runtime import Coordinator
 from routing_helpers import ROOT, copy_delivery, decision
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 SOURCE = "claude-design-system-prompt"
 COMMIT = "3c3ddb07d7aa3fef051d83608596470c95cfd8fe"
 HELPERS = f"<package_root>/scripts/{SOURCE}/claude"

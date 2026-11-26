@@ -19,7 +19,7 @@ from muro.runtime import Coordinator
 from routing_helpers import ROOT, copy_delivery, copy_prompts, proposed
 from test_audit_host import INLINE_LIMIT, packaged, run
 
-MARIONETTE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE as MARIONETTE  # the project file, unpacked
 PACKAGE = MARIONETTE
 
 

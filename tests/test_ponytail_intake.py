@@ -18,7 +18,7 @@ from muro.runtime import Coordinator
 from routing_helpers import ROOT, decision
 
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 SOURCE = "ponytail"
 COMMIT = "7801d061243d7b753bad0e0b3c057cd250b11755"
 SKILLS = ("ponytail", "ponytail-review", "ponytail-audit", "ponytail-debt", "ponytail-gain", "ponytail-help")

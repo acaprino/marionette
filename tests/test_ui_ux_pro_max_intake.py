@@ -4,7 +4,7 @@ from pathlib import Path
 
 from muro import check_sources, parse_capabilities, parse_router
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 
 
 def test_ui_ux_pro_max_manifest_is_mit_and_scoped():

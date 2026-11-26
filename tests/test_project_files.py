@@ -1,6 +1,6 @@
-"""The project files Marionette keeps beside its package (ADR-0028, decision 5: Marionette is the default project).
+"""The project files Marionette carries beside its package, in its project file (Muro's ADR-0028 and ADR-0034).
 
-`source/` carries the project's own files beside the package: `project.json`, `records.json`,
+`marionette.mp` carries the project's own files beside the package: `project.json`, `records.json`,
 `history.json` and `CHANGELOG.md`. What they contain is checked for consistency (a run has its release note, a
 changelog entry a title and a text, a record's date is its own text's); never for completeness and never for
 equality with what the package or a note says now, so a release made by someone else, a note without a run, an
@@ -18,8 +18,10 @@ from muro.cli import main
 from muro.core import parse_router
 from muro.sources import license_files, notice_paths
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
-RELEASES = PACKAGE.parent / "docs" / "releases"  # the notes of each version, in this repository
+from project_dir import PACKAGE  # the project file, unpacked
+REPOSITORY = Path(__file__).resolve().parent.parent
+# The notes of each version: docs/releases/ up to 0.7.0, then releases/, which the store workflow writes from the file.
+RELEASES = (REPOSITORY / "docs" / "releases", REPOSITORY / "releases")
 DAY = re.compile(r"\d{4}-\d{2}-\d{2}")
 UTC_TIME = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 COMMIT = re.compile(r"[0-9a-f]{40}")
@@ -38,8 +40,11 @@ def version_key(version):
 
 def release_notes():
     """(version, title, first paragraph) of each published note: the first block of lines after the title."""
-    notes = []
-    for path in sorted(RELEASES.glob("marionette-v*.md")):
+    notes, seen = [], set()
+    for path in sorted(path for folder in RELEASES for path in folder.glob("marionette-v*.md")):
+        if path.name in seen:              # the same version in both folders: the first one is read
+            continue
+        seen.add(path.name)
         lines = path.read_text(encoding="utf-8").splitlines()
         assert lines[0].startswith("# "), path
         rest = [line.rstrip() for line in lines[1:]]
@@ -56,14 +61,14 @@ def release_notes():
 
 # --- project.json -----------------------------------------------------------------------------------
 
-def test_project_json_describes_marionette_as_the_default_project():
+def test_project_json_describes_marionette_and_its_repository():
     meta = load("project.json")
     plugin = manifest()["plugin"]
     assert project._project_json_errors(meta, plugin["slug"]) is None      # what `pack` enforces
     assert meta["name"] == "Marionette" == plugin["name"]                  # its version is not compared: see pack
     assert meta["slug"] == plugin["slug"]
     assert meta["author"] == "acaprino"
-    assert meta["builtin"] is True
+    assert meta["builtin"] is False                                        # Muro ships no project
     assert meta["repository"] == {"url": "https://github.com/acaprino/marionette", "branch": "main",
                                   "tag_prefix": "marionette-v"}
     assert set(meta) == {"schema", "name", "slug", "version", "author", "created", "changed", "repository", "builtin"}
@@ -128,19 +133,23 @@ def test_a_record_may_name_a_capability_or_a_source_the_package_no_longer_has():
 
 # --- history.json and CHANGELOG.md -------------------------------------------------------------------
 
-def test_each_history_run_matches_its_release_note_and_runs_are_newest_first():
-    """A run needs its note; a note needs no run (a release made later has none until its history is written)."""
+def test_each_history_run_matches_its_release_note_and_no_version_runs_twice():
+    """A run needs its note; a note needs no run (a release made later has none until its history is written).
+    The run of the version this file carries has no note yet: the store workflow writes it when it publishes."""
     runs = load("history.json")["runs"]
     paragraphs = {version: paragraph for version, _title, paragraph in release_notes()}
     assert runs and set(load("history.json")) == {"runs"}
     versions = [version_key(run["version"]) for run in runs]
-    assert versions == sorted(set(versions), reverse=True)              # newest first, none twice
-    assert [run["time"] for run in runs] == sorted((run["time"] for run in runs), reverse=True)
+    # None twice. Their order in the file says nothing: `muro project commit` appends a run, and Muro's app
+    # shows them by time.
+    assert len(set(versions)) == len(versions)
     assert len({run["id"] for run in runs}) == len(runs)
+    current = manifest()["plugin"]["version"]
     for run in runs:
-        assert set(run) == {"id", "time", "version", "status", "budget_usd", "engine", "pins", "changelog"}
+        # `operation` is what `muro project commit` records; the runs written before it have none
+        assert set(run) - {"operation"} == {"id", "time", "version", "status", "budget_usd", "engine", "pins", "changelog"}
         assert run["id"] == f"marionette-v{run['version']}"
-        assert run["version"] in paragraphs, f"{run['id']} has no docs/releases note"
+        assert run["version"] in paragraphs or run["version"] == current, f"{run['id']} has no release note"
         # the text is the note's as it was when the run was written: present, not equal to the note as it reads now
         assert isinstance(run["changelog"], str) and run["changelog"].strip(), run["id"]
         assert UTC_TIME.fullmatch(run["time"]), run["id"]

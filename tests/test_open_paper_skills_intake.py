@@ -19,7 +19,7 @@ from muro.entries import validate_entries
 from muro.runtime import Coordinator
 from routing_helpers import ROOT, copy_delivery, decision
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 COMMIT = "f85fd3dc80720dfa42fb5ab069f232f28c831109"
 HELPERS = "<package_root>/scripts/open-paper-skills/skills"
 KEPT = {

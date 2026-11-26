@@ -18,7 +18,7 @@ from muro.runtime import Coordinator
 from routing_helpers import ROOT, decision
 
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 SOURCE = "superpowers"
 COMMIT = "22f0b463e7a5e579904dd6211a520321035526f7"
 RELEASE = "v7.0.2"

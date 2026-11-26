@@ -19,7 +19,7 @@ from muro.runtime import Coordinator
 from routing_helpers import ROOT, decision
 
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 SOURCE = "zero-slop-design"
 COMMIT = "c5cdc7ce499846c23d90732e4958b44f92823756"
 RELEASE = "v0.2.1"

@@ -1,40 +1,10 @@
 name: Release
-
-# Every merge into main that brings a new build publishes it: the tag marionette-v<version> (the version in
-# marionette/sources.json) and a GitHub release with marionette-<version>.zip, the folder marionette/, and its
-# SHA-256, with the notes in releases/<tag>.md. A main without a build, or whose version is already tagged,
-# publishes nothing: a published release is never replaced.
 on:
   push:
     branches: [main]
-
-permissions:
-  contents: write
-
-concurrency:
-  group: release
-  cancel-in-progress: false
-
+    paths: ['*.mp']
+  workflow_dispatch:
+permissions: { contents: write }
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Publish the build on main
-        run: |
-          if [ ! -f marionette/sources.json ]; then echo "No build on main: nothing to publish"; exit 0; fi
-          version=$(python3 -c 'import json; print(json.load(open("marionette/sources.json"))["plugin"]["version"])')
-          tag="marionette-v$version"
-          if [ -n "$(git ls-remote --tags origin "refs/tags/$tag")" ]; then
-            echo "::warning::$tag is already published; this merge publishes nothing"; exit 0
-          fi
-          python3 -c 'import shutil, sys; shutil.make_archive(sys.argv[1], "zip", ".", "marionette")' "$RUNNER_TEMP/marionette-$version"
-          notes="$PWD/releases/$tag.md"
-          if [ -f "$notes" ]; then set -- --notes-file "$notes"; else set -- --generate-notes; fi
-          cd "$RUNNER_TEMP"
-          sha256sum "marionette-$version.zip" | tee "marionette-$version.zip.sha256"
-          gh release create "$tag" --target "$GITHUB_SHA" --title "Marionette $version" "$@" \
-            "marionette-$version.zip" "marionette-$version.zip.sha256"
+  store:
+    uses: acaprino/muro/.github/workflows/project-store.yml@muro-v0.10.0

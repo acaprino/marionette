@@ -13,7 +13,7 @@ from muro import parse_capabilities, parse_router
 from muro.runtime import Coordinator
 from routing_helpers import ROOT, copy_delivery, decision
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 EXPLAIN = {
     "interactive-explainer": ("explainer-authoring", ["explainer.source-walkthrough", "explainer.topic-research",
                                                      "explainer.codebase-walkthrough"]),

@@ -10,7 +10,7 @@ from pathlib import Path
 
 from muro import parse_capabilities
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 COMMIT = "d77a9fc8cb371cab1ba5420df5bfd232cd14c9bb"
 FORMATS = ("MP4", "GIF", "WebM", "dotLottie", "Lottie JSON")
 

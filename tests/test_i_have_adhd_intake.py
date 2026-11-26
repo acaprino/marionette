@@ -16,7 +16,7 @@ from muro.runtime import Coordinator
 from routing_helpers import ROOT, decision
 
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 SOURCE = "i-have-adhd"
 COMMIT = "1ecea1993b7fce257ffbd686c070948b5e07eda6"
 CANONICAL = "skills/i-have-adhd/SKILL.md"

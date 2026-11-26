@@ -17,7 +17,7 @@ from muro.entries import validate_entries
 from muro.runtime import Coordinator
 from routing_helpers import ROOT, copy_delivery, decision
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 COMMIT = "ec8ff5ec7ed5924520ee71b705a920ee64fe2918"
 HELPERS = "<package_root>/scripts/tokeneconomizer"
 EVENTS = ["SessionStart", "UserPromptSubmit", "PostToolUse", "PostToolUseFailure", "Stop", "SessionEnd"]

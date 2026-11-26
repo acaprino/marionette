@@ -18,7 +18,7 @@ from muro.runtime import Coordinator
 from routing_helpers import ROOT, decision
 
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 SOURCE = "better-layout"
 COMMIT = "672ae44ace6aaed65b86cbb1e2fd6fbea0e79578"
 CAPABILITY = "layout-structure"

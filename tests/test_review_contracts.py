@@ -8,7 +8,7 @@ import pytest
 from muro.runtime import Coordinator, runtime_main
 from routing_helpers import copy_prompts
 
-PACKAGE = Path(__file__).resolve().parent.parent / "source"  # the package directory of this repository
+from project_dir import PACKAGE  # the project file, unpacked
 
 
 @pytest.fixture
