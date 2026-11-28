@@ -1,7 +1,7 @@
 {
   "name": "marionette",
   "displayName": "Marionette",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Marionette \u2014 unified multi-host coordinator plugin",
   "author": {
     "name": "Muro contributors"

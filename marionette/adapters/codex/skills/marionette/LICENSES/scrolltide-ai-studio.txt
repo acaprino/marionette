@@ -1,0 +1,40 @@
+Two licences apply in this repository.
+
+1. The skill: instructions, house style, patterns, checks and scripts
+   (everything except the files in plugins/ai-studio/skills/scrolltide-ai-studio/library/
+   other than library/INDEX.md)
+
+MIT License
+
+Copyright (c) 2026 Scrolltide
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+2. The library builds (library/*.md, except library/INDEX.md) and the assets they download
+
+Copyright (c) 2026 Scrolltide. All rights reserved.
+
+You may use these builds, and the assets they download, to make websites for
+yourself and for your clients, including paid client work, with no limit on the
+number of sites. The websites you make are yours, or your client's, to use,
+deploy and earn from.
+
+You may not resell, redistribute or sublicense the builds or their assets as
+templates, prompts, themes, kits or part of another library, whether free or
+paid, modified or not. The full terms are at https://www.scrolltide.co/terms

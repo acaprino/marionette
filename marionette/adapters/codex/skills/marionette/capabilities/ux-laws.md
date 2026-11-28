@@ -60,7 +60,7 @@ Resolve `<package_root>` with the `package_root` returned beside these instructi
 ## Sources
 
 - AI intent mapping: charles-design-laws → ui.ux-laws (its eight steps applied to the code, delivered as "Building") and ui.ux-laws-review (the same steps without edits, delivered as "Reviewing").
-- Source: charles-skills (LemonFace0309/charles-skills@83de509d, MIT, Copyright (c) 2026 Charles Liu; commit `83de509dd10b77ebaf83c3f9986b538cdaf19b63`, pin `head`: the upstream has no release or tag). Opened at run time from `<package_root>/scripts/charles-skills/skills/drops/charles-design-laws/`: `SKILL.source.md`, the only file of the method. The skill states its own sources: Jon Yablonski's Laws of UX, Jakob Nielsen on progressive disclosure, and Johnson and Goldstein (2003) on defaults.
+- Source: charles-skills (LemonFace0309/charles-skills@a24c5f2c, MIT, Copyright (c) 2026 Charles Liu; commit `a24c5f2c54d477c67e5407d49ae6c9da08c7ed80`, pin `head`: the upstream has no release or tag). Opened at run time from `<package_root>/scripts/charles-skills/skills/drops/charles-design-laws/`: `SKILL.source.md`, the only file of the method. The skill states its own sources: Jon Yablonski's Laws of UX, Jakob Nielsen on progressive disclosure, and Johnson and Goldstein (2003) on defaults.
 - Changes for coexistence (ADR-0017):
   - The frontmatter description and its trigger list are not an activation rule: the coordinator classifies by meaning (competing routing); the intent descriptions above replace them.
   - "charles-ux-animation covers them" names a skill that is in this package as the capability `interaction-motion`: the step names that capability, in its own step (one capability per step), and applies none of its rules.

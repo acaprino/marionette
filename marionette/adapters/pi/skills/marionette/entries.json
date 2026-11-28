@@ -2,14 +2,16 @@
   "entries": [
     {
       "name": "marionette-web-design",
-      "description": "Use when designing, building or restyling a website or landing page (offer, copy, outline, typeface, colours, layout), when asking which design system, palette, typography or accessibility and UX rules suit an app screen, dashboard or component, or when creating or updating designs, components and tokens inside a design tool's file (Figma, FigCraft or another canvas editor). Not for a clickable prototype of app screens in HTML.",
+      "description": "Use when building or restyling a website, landing page (offer, copy, outline, typeface, colours, layout), scrollytelling page or cinematic hero (scroll film, layered parallax, self-drawing path, sideways reel, video hero) or a full-source builder handoff prompt (Lovable, Bolt, v0, Cursor), asking which design system or UX rules suit an app screen or component, or editing designs in Figma, FigCraft or another canvas editor. Not for clickable HTML app prototypes.",
       "capabilities": [
         "visual-direction",
+        "scroll-storytelling",
         "design-guidance",
         "canvas-design"
       ],
       "absorbs": [
         "landing-page-design",
+        "scrolltide-ai-studio",
         "figma-designer",
         "ui-ux-pro-max"
       ]
@@ -79,12 +81,13 @@
     },
     {
       "name": "marionette-motion",
-      "description": "Use when deciding how an interface moves (purpose, durations, easing, choreography, reduced-motion alternatives), when adding or reviewing animation, transitions, press and hover feedback, loading and optimistic states in the project's code (modals, drawers, popovers, toasts, icon swaps, async buttons), when asking for a rendered animation file (MP4, GIF, WebM, dotLottie, Lottie JSON) or when implementing scroll-linked animation, pinning, scrub, parallax or horizontal scroll sections with GSAP ScrollTrigger or pure CSS scroll-driven timelines. Not for finishing a whole screen with its motion checked frame by frame (polish).",
+      "description": "Use when specifying UI motion (durations, easing, choreography, reduced motion), adding or reviewing interaction transitions, feedback and loading states in code (modals, drawers, popovers, toasts, icon swaps, async buttons), exporting a rendered animation file (MP4, GIF, WebM, Lottie), implementing GSAP ScrollTrigger or CSS scroll timelines, or auditing any scroll page at desktop/phone/reduced-motion checkpoints with Playwright. Not for whole scrollytelling sites (web design) or frame-by-frame screen polish.",
       "capabilities": [
         "motion-principles",
         "interaction-motion",
         "gsap-scrolltrigger",
-        "css-scroll"
+        "css-scroll",
+        "scroll-checkpoint-audit"
       ],
       "absorbs": [
         "motion-design",

@@ -17,7 +17,7 @@ def register(ctx):
         return
     # The build already bounded the policy (one allowance per contributing source); never cut it here.
     policy = (root / "policy.md").read_text(encoding="utf-8")
-    if len(policy.strip()) <= 4000:
+    if len(policy) <= 4000:
         register_section('marionette.always-on', policy, position="after_memory", max_chars=4000)
         return
 

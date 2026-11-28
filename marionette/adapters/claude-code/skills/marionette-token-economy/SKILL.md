@@ -2,7 +2,7 @@
 name: marionette-token-economy
 description: "Use when the user asks what TokenEconomizer learned or saved in this repository or what their agent sessions cost, wants to see or change its repository facts (micro-skills), its tool pruning deny list or its loop guard, to give pruned tools back, to change its settings, or to turn its automatic mode on or off for a project. Not for questions about model pricing or for shrinking a prompt by hand. It replaces the absorbed tokeneconomizer: use this skill instead of them, also when the user names one of them."
 user-invocable: false
-allowed-tools: Bash(python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py *) Bash(python "${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py" *) Read(${CLAUDE_PLUGIN_ROOT}/**) Read(/${CLAUDE_PLUGIN_ROOT}/**) Edit(./.marionette/**)
+allowed-tools: Bash(python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py *) Bash(python "${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py" *) PowerShell(python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py *) PowerShell(python "${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py" *) Read(${CLAUDE_PLUGIN_ROOT}/**) Read(/${CLAUDE_PLUGIN_ROOT}/**) Edit(./.marionette/**)
 ---
 
 # Marionette coordinator
@@ -14,19 +14,34 @@ also need capabilities outside this entry, and the catalog decides, not the entr
 The offline `GUIDE.html` in the `marionette` skill folder explains this release's decision graph,
 commands, intents and handoffs. It is documentation, not an activation mechanism.
 
+This skill holds for the rest of the conversation. When a later request, or a part of a
+larger task you are doing, is work this catalog covers (a follow-up that changes the
+result, another screen, a review), invoke this skill again, or the Marionette skill for that
+work, and start from step 1 before you do it by hand: the invocation is what lets the
+host run its launcher calls, and the user installed Marionette so that the work of its
+sources is done with them.
+
+Speak to the user about the work: what each part of the plan makes or checks, in their
+words, and the choices it leads to. Classification, plans, maps, steps, records and
+launcher calls are this coordinator's mechanics: run them without announcing or
+recapping them.
+
 Keep every command below on one line: no heredoc, no pipe, no `cd … &&`, no JSON
 in the command. Write each JSON file with your file tool and pass its path, so the
 host's permission rules match every call. `.marionette` is this coordinator's folder in
 the current project; the runtime keeps it out of Git with its own `.gitignore`.
 
-1. Read the user's task and relevant project context. Run:
-   `python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py plan --compact --focus token-economy --task "<user task>" --project "<current project>"`.
+1. Read the user's task and relevant project context. Decide which areas of Marionette the
+   result needs: the skills named `marionette-…` in your skill list (without a plugin prefix the
+   host adds), this one included. Name every one of them in `--focus`, where a
+   skill's name stands for all its capabilities, and run:
+   `python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py plan --compact --focus marionette-token-economy[,<another marionette- skill>…] --task "<user task>" --project "<current project>"`.
 2. The result is `classification-required` with `context` and a compact `catalog`
    (empty fields are omitted). Entries marked `brief` index the capabilities
    outside the focus: a group of capability ids with what the group is for, or one
    capability with its role and intents. They belong to this same catalog. When any
    part of the task needs one, rerun the same command with `--focus <ids>`
-   (comma-separated, keeping the ids already in focus) to read its intents,
+   (capability ids or skill names, comma-separated, keeping the ones already in focus) to read its intents,
    exclusions, tools and constraints, then select it: the plan covers the whole
    request, not only the capabilities in focus. YOU are the AI classifier: apply the Classification
    rules at the end of this file to the task and the project. Interpret outcomes,
@@ -38,6 +53,8 @@ the current project; the runtime keeps it out of Git with its own `.gitignore`.
    (the returned `classification_path`), then run, with the same stack options
    (a stack token is passed whole, prefix included: `--stack stack:css-only`):
    `python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py plan --task "<same task>" --project "<current project>" --classification "<current project>/.marionette/classification.json"`.
+   When the user asked for the work to be done, not proposed, add `--confirm` to that
+   same call: the plan needs no further approval, and the result is its first step.
    A `no_match` or `needs_clarification` result stops execution; explain or ask its
    questions. Never silently substitute a coordinator or another variant.
 3. If `direct`, apply only its instructions and run its checks, then hand its
@@ -45,8 +62,8 @@ the current project; the runtime keeps it out of Git with its own `.gitignore`.
    and run the returned `submit` line through the launcher
    (`python ${CLAUDE_PLUGIN_ROOT}/skills/marionette/muro.py record --direct --project "<current project>" --capability <capability> --outputs "<current project>/.marionette/outputs.json"`).
    A denied shell command does not deny the launcher: run the `submit` line as given.
-   If `confirm`, show the ordered plan in the user's words (what each step produces)
-   and obtain one-line approval unless already authorized, then repeat the same plan
+   If `confirm` (the call had no `--confirm`), show the ordered plan in the user's words
+   (what each step produces) and obtain one-line approval, then repeat the same plan
    call with `--confirm`. Use `resume` for an existing map; `--new` archives evidence
    when confirming a freshly classified task (add `--preserve-completed <steps>` to
    keep valid upstream outputs). A `confirm` result with `approval: not-needed` is one
@@ -138,13 +155,21 @@ Never install/register a hook, or run source commands, merely because metadata
 describes a default. Python does not verify tool availability or execute hooks.
 
 Classify the desired outcomes, respecting negation, language, requested stage,
-existing artifacts and explicit non-goals. Select the smallest sufficient set of
-capabilities. The coordinator adds their `after` prerequisites mechanically.
+existing artifacts and explicit non-goals. Size the selection to the outcome, not
+to the words of the request. A precise operation (check one property, convert a
+file, report without changing anything) is the capability that does it. A result
+the user wants made, or made better, takes every capability in the catalog whose
+own work that result needs in order to be complete and good, also those the request
+does not name: the user names a result, not the crafts it takes. Read the whole
+catalog for them, the brief groups included, and order them so that each builds on
+what comes before it, the capabilities that make or change the result before those
+that only check it. Never add a capability whose work only repeats one already
+selected. The coordinator adds their `after` prerequisites mechanically.
 If a prerequisite's outputs exist, record/reuse them through the workflow rather
 than inventing completion. Do not select a capability just because its stack exists.
-Do not extrapolate unrequested stages: a static layout does not imply animation;
-an interaction specification does not imply scroll or runtime code; mentioning an
-external design or document tool as inspiration does not request editing in it.
+A stage the user rules out stays out, and so does a stage the result does not
+contain: a specification asked for on its own does not ask for its code; mentioning
+an external design or document tool as inspiration does not request editing in it.
 
 Choose at most one variant per role, justified by the request and compatible stack.
 Respect `conflicts` for the whole selected/prerequisite graph. Compare actual
@@ -184,7 +209,7 @@ and `catalog_digest`. Add exactly `status`, `selections`, `reason`, `questions`:
 - `selected`: nonempty selections, one entry per step, no questions. When the
   same capability must run multiple distinct operations in one plan, give each
   occurrence an explicit `"step_id": "<capability>#<n>"` (for example `#1`, `#2`).
-  Select complementary capabilities explicitly when both are requested, in
+  Select complementary capabilities explicitly when the result needs both, in
   execution order: a capability that consumes another's outputs comes after it.
   The catalog's `reads` lists the outputs each capability uses when recorded.
   The coordinator keeps this order and adds only declared `after` prerequisites.

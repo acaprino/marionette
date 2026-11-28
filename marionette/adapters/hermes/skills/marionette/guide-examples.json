@@ -634,6 +634,58 @@
       ],
       "reason": "Un solo passo, senza specifica separata perché la richiesta dice già cosa serve. Se esiste una specifica di movimento registrata, i suoi tempi vincono su quelli del metodo.",
       "questions": []
+    },
+    {
+      "title": "Landing scrollytelling con strategia a monte",
+      "task": "Definisci offerta e struttura della landing per il nostro orologiaio di Ginevra, poi costruisci la pagina scrollytelling in cui lo scroll porta la telecamera dal banco al movimento tramite sequenza di frame su canvas, verificata su desktop e telefono.",
+      "stack_tokens": [],
+      "status": "selected",
+      "selections": [
+        {
+          "capability": "visual-direction",
+          "intent": "ui.landing-strategy",
+          "reason": "Serve prima definire offerta, pubblico, CTA e outline della landing senza imporre il sistema visivo piatto."
+        },
+        {
+          "capability": "scroll-storytelling",
+          "intent": "ui.scroll-page",
+          "reason": "Il risultato richiesto è una pagina scrollytelling guidata da una sequenza di frame su canvas con un solo loop rAF e Lenis, che consuma offer e page_outline registrati e verifica gli screenshot ai checkpoint."
+        }
+      ],
+      "reason": "Sinergia tra i due ruoli: la strategia di visual-direction produce offerta e struttura, poi scroll-storytelling costruisce lo scroll moment e la verifica lungo l'intero scroll.",
+      "questions": []
+    },
+    {
+      "title": "Prompt full-source per Lovable o Cursor",
+      "task": "Scrivimi un prompt completo con tutti i file sorgenti pronti da incollare in Lovable per una landing scrollytelling con percorso SVG che si disegna allo scroll per la nostra gara di trail running.",
+      "stack_tokens": [],
+      "status": "selected",
+      "selections": [
+        {
+          "capability": "scroll-storytelling",
+          "intent": "ui.scroll-handoff",
+          "reason": "L'utente chiede un prompt full-source di handoff per un altro builder AI (Lovable), non solo codice locale né una descrizione."
+        }
+      ],
+      "reason": "Un solo passo sull'intento di handoff: costruisce e verifica la base dai pattern e la serializza nel formato completo con note specifiche per Lovable.",
+      "questions": []
+    },
+    {
+      "title": "Verifica ai checkpoint di scroll su una pagina GSAP",
+      "task": "Controlla la nostra landing GSAP in dist/ a 0, 25, 50, 75 e 100% di scroll su desktop, mobile e reduced motion con Playwright: verifica che nessuno stage pinnato resti bloccato, che non ci sia scroll orizzontale e sistema eventuali errori bloccanti senza toccare i colori del nostro DESIGN.md.",
+      "stack_tokens": [
+        "stack:gsap"
+      ],
+      "status": "selected",
+      "selections": [
+        {
+          "capability": "scroll-checkpoint-audit",
+          "intent": "ui.scroll-checkpoint-audit",
+          "reason": "Serve la verifica Playwright lungo i checkpoint di scroll con scrollshot.mjs, senza confliggere con GSAP né riscrivere il sistema registrato nel DESIGN.md."
+        }
+      ],
+      "reason": "La verifica è separata dalla costruzione scrollytelling proprio per funzionare anche su pagine GSAP, CSS scroll o visual-direction senza conflitti di motore.",
+      "questions": []
     }
   ]
 }

@@ -1,4 +1,4 @@
-Marionette v0.7.1 — Aggregated NOTICE
+Marionette v0.8.0 — Aggregated NOTICE
 
 The following upstream works are adapted and merged into Marionette:
 
@@ -129,6 +129,10 @@ and development tooling and are not shipped in the application.
   Copyright (c) 2026 Charles Liu
   Modified and merged into Marionette.
 
+- scrolltide-ai-studio — MIT (see LICENSES/scrolltide-ai-studio.txt)
+  Copyright (c) 2026 Scrolltide
+  Modified and merged into Marionette.
+
 Runtime Dependencies (Not Bundled):
   - gsap (3): GSAP Standard License (target project dependency, not bundled by Muro)
   - A design tool integration of the host: Figma MCP with figma-use, FigCraft's MCP server, or another canvas editor's (): External host integration, not bundled by Muro
@@ -140,3 +144,5 @@ Runtime Dependencies (Not Bundled):
   - Python 3 with numpy and Pillow, for charles-color-analysis's color.py (): PSF, BSD-3-Clause and MIT-CMU runtime prerequisites, not bundled by Muro
   - Node.js 18 or newer with playwright-core 1.63.0 and sharp 0.35.5 (npm install --prefix into the packaged charles-polish/scripts folder), for the capture and measuring scripts (): MIT (Node.js), Apache-2.0 (playwright-core, sharp; sharp's prebuilt libvips is LGPL-3.0-or-later); installed at run time, not bundled by Muro
   - Google Chrome or Chromium (color.py shot, web-frames.mjs); ffmpeg for recordings; Xcode's simctl and Swift with Vision on macOS (): External programs of the host, not bundled by Muro
+  - Node.js 18+ with Playwright (or playwright-core + installed Chrome/Edge) for scripts/scrollshot.mjs (): MIT (Node.js), Apache-2.0 (Playwright); installed at run time in the target project when missing, not bundled by Muro
+  - Scrolltide MCP (optional remote MCP server for searching and pulling full builds on Scrolltide Yearly/Lifetime plans) (): External remote service, not bundled by Muro; used only when the user has connected it

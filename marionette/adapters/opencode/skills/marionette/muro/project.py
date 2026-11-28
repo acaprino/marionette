@@ -28,13 +28,13 @@ import zipfile
 import zlib
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Iterator, NamedTuple
+from typing import Any, Iterable, Iterator, NamedTuple
 
 from .core import SLUG_PATTERN, is_device_name, validate_plugin_identity
 from .custom_instructions import DIRECTORY as CUSTOM_INSTRUCTIONS
 from .delivery import FORMS
 from .entries import entry_description, load_entries, validate_entries
-from .factory import PROMPT_FILES, _selected, prompts_dir
+from .factory import PROMPT_FILES, _selected, prompts_dir, starts_as_script
 from .guide import guide_data
 from .sources import (_validate_source_shape, inspect_source, license_files, notice_paths, parse_capabilities,
                       source_repository, tree_entries)
@@ -434,7 +434,9 @@ def info(mp: Path, cache_root: Path) -> dict[str, Any]:
         "changelog": changelog,
         "prompts": [{"file": name, "text": (prompts_folder / name).read_text(encoding="utf-8")} for name in PROMPT_FILES],
         "instructions": _instruction_texts(folder),
+        "system_prompt": data["system_prompt"],
         "graph": {"entries": entries, "capabilities": data["capabilities"], "examples": data["examples"]},
+        "export_harnesses": _export_harnesses(folder / "release" / plugin["slug"] / "adapters"),
         "files": _file_rows(
             plugin, meta, inputs=len(sources), decisions=len(decisions), capabilities=len(data["capabilities"]),
             entries=len(entries) if entries_doc else None, examples=len(data["examples"]),
@@ -510,15 +512,11 @@ def check_release(package: Path, built: Path) -> None:
     raise ValueError(f"{MISMATCH} ({'; '.join(differences)})")
 
 
-def verify(mp: Path, cache_root: Path) -> None:
-    """Check, as `check_release` does, the plugin a project file carries against the package it carries.
-
-    Read through `cached`, so it is the very file the digest names. A project that carries no release for its
-    plugin has nothing to disagree with: installing it is refused where the release is looked for.
-    """
-    folder = cached(mp, cache_root)
+def _verified_release(folder: Path) -> tuple[Path, dict]:
+    """Read the plugin identity and check the release of this single content-addressed unpack."""
     try:
-        slug = json.loads(_member(folder, "sources.json").read_text(encoding="utf-8"))["plugin"]["slug"]
+        plugin = json.loads(_member(folder, "sources.json").read_text(encoding="utf-8"))["plugin"]
+        slug = plugin["slug"]
     except (ValueError, KeyError, TypeError) as exc:
         raise ValueError(f"{MISMATCH} (the project's plugin cannot be read: {type(exc).__name__}: {exc})") from None
     if not isinstance(slug, str) or not SLUG_PATTERN.fullmatch(slug):   # it names a folder: never a path
@@ -526,6 +524,69 @@ def verify(mp: Path, cache_root: Path) -> None:
     built = folder / "release" / slug
     if built.is_dir():
         check_release(folder, built)
+    return built, plugin
+
+
+def verify(mp: Path, cache_root: Path) -> None:
+    """Check an embedded release against its package. A project without a release also passes."""
+    _verified_release(cached(mp, cache_root))
+
+
+def verified_build(mp: Path, cache_root: Path) -> dict:
+    """Identify the exact archive and built plugin that Sync can use, in one read of the archive."""
+    folder = cached(mp, cache_root)
+    built, plugin = _verified_release(folder)
+    if not built.is_dir():
+        raise ValueError("This project has no built plugin yet: it is built when the project is harmonized")
+    errors = validate_plugin_identity(plugin)
+    if errors:
+        raise ValueError("Invalid plugin: " + "; ".join(errors))
+    return {"verified": True, "digest": folder.name, "slug": plugin["slug"], "version": plugin["version"]}
+
+
+def _export_harnesses(adapters: Path) -> list[str]:
+    if not adapters.is_dir():
+        return []
+    return sorted(path.name for path in adapters.iterdir() if (path / "INSTALL.md").is_file())
+
+
+def extract(mp: Path, harness: str, out: Path, cache_root: Path, *, expect_digest: str | None = None) -> list[Path]:
+    """The built plugin of one harness, as the project file carries it, into `out/<harness>/` (ADR-0035).
+
+    Nothing is built. Hermes also gets `out/hermes-mcp/` when the build has it: its INSTALL.md reaches it as
+    `../hermes-mcp`. `out` may hold other things; a folder this writes must not be there yet.
+    """
+    folder = cached(mp, cache_root)
+    if expect_digest is not None and expect_digest != folder.name:
+        raise ValueError("The project file changed. Check for updates in Sync before exporting it.")
+    built, _ = _verified_release(folder)
+    adapters = built / "adapters"
+    offered = _export_harnesses(adapters)
+    if not offered:
+        raise ValueError("This project has no built plugin yet: it is built when the project is harmonized")
+    if harness not in offered:
+        raise ValueError(f"This project's build has no adapter for {harness}: it has {', '.join(offered)}")
+    names = [harness]
+    if harness == "hermes" and (adapters / "hermes-mcp").is_dir():
+        names.append("hermes-mcp")
+    targets = [Path(out) / name for name in names]
+    for target in targets:
+        if target.resolve().is_relative_to(folder.resolve()):
+            raise ValueError("Choose an export folder outside this project's cached files")
+        if target.exists():
+            raise ValueError(f"{target} already exists: choose another folder")
+    made: list[Path] = []
+    try:
+        for name, target in zip(names, targets):
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.mkdir()              # claims the name: only what was made here is ever removed
+            made.append(target)
+            shutil.copytree(adapters / name, target, dirs_exist_ok=True)
+    except OSError:
+        for target in made:             # a half-written plugin is not left to be installed
+            shutil.rmtree(target, ignore_errors=True)
+        raise
+    return targets
 
 
 # --- writing ----------------------------------------------------------------------------------------
@@ -549,12 +610,36 @@ def _walk(root: Path) -> Iterator[tuple[str, Path]]:
 
 
 def _executable(path: Path) -> bool:
+    """What the disk says. Windows keeps no such bit and answers no for every file, so an input and a built helper
+    are never asked of the disk alone (`_kept_executable`, `_add_release`)."""
     return bool(path.stat().st_mode & 0o111)
 
 
+def executable_members(mp: Path) -> frozenset[str]:
+    """The names of the files a project file marks executable. The file says it; a folder unpacked on a disk
+    that keeps no such bit cannot."""
+    with open(mp, "rb") as handle, _open(handle) as archive:
+        return frozenset(info.filename for info in archive.infolist()
+                         if not info.is_dir() and (info.external_attr >> 16) & 0o111)
+
+
 def _add_tree(members: dict[str, _Member], root: Path, prefix: str) -> None:
+    # shortcut: a package's own file is executable only where the disk says so, and no package ships a script
+    # among its own files; when one does, carry the mark from the file it was unpacked from, as the inputs do.
     for relative, path in _walk(root):
         members[prefix + relative] = _Member(path, _executable(path))
+
+
+def _add_release(members: dict[str, _Member], built: Path, prefix: str) -> None:
+    """The built plugin. A helper (a file under a `scripts/` folder, at the root or in an adapter) that the
+    build made executable is marked so whatever the disk says: the build's own rule (`starts_as_script`) is
+    asked again, so a pack on Windows marks what a pack on Linux marks."""
+    for relative, path in _walk(built):
+        marked = _executable(path)
+        if not marked and "scripts" in relative.split("/")[:-1]:
+            with path.open("rb") as handle:
+                marked = starts_as_script(handle.read(2))
+        members[prefix + relative] = _Member(path, marked)
 
 
 def _project_json_errors(data: Any, slug: str) -> str | None:
@@ -661,7 +746,7 @@ def _store(destination: Path, snapshot: dict[str, _Member]) -> None:
 
 
 # What picks the files a cached copy of a source holds, and what it was fetched and checked for.
-_STAMPED = ("selected_paths", "media_paths", "notice_paths", "license_path", "excluded_paths", "license")
+_STAMPED = ("selected_paths", "media_paths", "notice_paths", "license_path", "license_section", "excluded_paths", "license")
 
 
 def _stamp(src: dict[str, Any]) -> str:
@@ -680,24 +765,46 @@ def _entry(cache: Path, src: dict[str, Any]) -> tuple[Path, Path]:
     return cache / src["id"] / src["commit"], cache / src["id"] / f"{src['commit']}.stamp"
 
 
-def _seal(cache: Path, src: dict[str, Any]) -> None:
-    """Mark the entry as made for `src`'s selection: the stamp appears whole or not at all, after the files are in place."""
-    stamp = _entry(cache, src)[1]
-    temporary = stamp.parent / f".{stamp.name}.{secrets.token_hex(4)}.tmp"
+def _modes(cache: Path, src: dict[str, Any]) -> Path:
+    """Beside the stamp: the names of the entry's executable files, which a disk without that bit cannot keep."""
+    return cache / src["id"] / f"{src['commit']}.modes"
+
+
+def _kept_executable(cache: Path, src: dict[str, Any]) -> frozenset[str] | None:
+    """The executable files of a cache entry, by their names in it; None when the entry does not say."""
     try:
-        temporary.write_text(_stamp(src), encoding="ascii")
-        os.replace(temporary, stamp)
+        names = json.loads(_modes(cache, src).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return frozenset(names) if isinstance(names, list) and all(isinstance(name, str) for name in names) else None
+
+
+def _put(path: Path, text: str) -> None:
+    """A small file of the cache, whole or not at all."""
+    temporary = path.parent / f".{path.name}.{secrets.token_hex(4)}.tmp"
+    try:
+        temporary.write_text(text, encoding="utf-8")
+        os.replace(temporary, path)
     except BaseException:
         temporary.unlink(missing_ok=True)
         raise
 
 
+def _seal(cache: Path, src: dict[str, Any], executable: Iterable[str] = ()) -> None:
+    """Mark the entry as made for `src`'s selection, with the names of its executable files (none for an entry
+    filled by hand). The stamp is written last, after the files and the names are in place."""
+    _put(_modes(cache, src), json.dumps(sorted(set(executable)), ensure_ascii=False) + "\n")
+    _put(_entry(cache, src)[1], _stamp(src))
+
+
 def _current(cache: Path, src: dict[str, Any]) -> bool:
     """Whether the cache holds an entry made for exactly this source. An entry without a stamp (made before
-    entries carried one) or with another is not: it is fetched again."""
+    entries carried one) or with another is not, and neither is one that does not name its executable files
+    (made before entries kept them): it is fetched again."""
     folder, stamp = _entry(cache, src)
     try:
-        return folder.is_dir() and stamp.read_text(encoding="ascii") == _stamp(src)
+        return (folder.is_dir() and stamp.read_text(encoding="ascii") == _stamp(src)
+                and _kept_executable(cache, src) is not None)
     except (OSError, ValueError):
         return False
 
@@ -716,8 +823,9 @@ def _source_snapshot(src: dict[str, Any], package: Path, cache: Path | None) -> 
     _validate_source_shape(src)
     kept = _entry(cache, src)[0] if cache else None
     if cache is not None and _current(cache, src):
-        snapshot: dict[str, _Member] = {}
-        _add_tree(snapshot, kept, "")
+        listed = _kept_executable(cache, src) or frozenset()
+        snapshot: dict[str, _Member] = {relative: _Member(path, _executable(path) or relative in listed)
+                                        for relative, path in _walk(kept)}
     else:
         license_bytes, notice = inspect_source(src, package, coverage=True)
         with source_repository(src, package) as repo:
@@ -735,7 +843,7 @@ def _source_snapshot(src: dict[str, Any], package: Path, cache: Path | None) -> 
             if kept.exists():
                 shutil.rmtree(kept)
             _store(kept, snapshot)
-            _seal(cache, src)
+            _seal(cache, src, [name for name, member in snapshot.items() if member.executable])
     missing = [path for path in notice_paths(src) if path not in snapshot]
     if missing:
         raise ValueError(f"notice_paths names {', '.join(missing)}, which the source's files do not hold")
@@ -813,7 +921,7 @@ def pack(package_dir: Path, out: Path, *, sources_cache: Path | None = None,
         for relative, member in snapshot.items():
             members[f"inputs/{src['id']}/{relative}"] = member
     if built is not None:
-        _add_tree(members, built, f"release/{built.name}/")
+        _add_release(members, built, f"release/{built.name}/")
     for name in members:
         _check_name(name)
         _check_layout(name)

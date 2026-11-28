@@ -3,9 +3,9 @@
     "slug": "marionette",
     "name": "Marionette",
     "command": "marionette",
-    "version": "0.7.1",
+    "version": "0.8.0",
     "language": "it",
-    "description": "Use when building websites, landing pages, UI/UX, layout, accessibility guidance, wireframing or prototyping app screens, choosing a product look, design variations, tweak panels or HTML decks, extracting tokens, auditing and polishing interfaces, colour critique, a DESIGN.md of design choices, applied, inspected, exported or enforced in CI, Figma, FigCraft, motion, GSAP or CSS scroll animation; creating, editing or converting Office (Word, Excel, PowerPoint) and PDF files; implementing or reviewing changes, specs and handoffs, repository audits, shortcut debt or the Ponytail method; idea briefs, design documents, their fresh review, contract READMEs, design drift reports; implementation plans from a spec, executed under TDD; explaining a paper, article or concept as an HTML page, making and fact-checking explainers; humanizing prose; paper search; steering TokenEconomizer.",
+    "description": "Use when building websites, landing or scrollytelling pages, UI/UX, layout, accessibility guidance, wireframing or prototyping app screens, choosing a product look, design variations, tweak panels or HTML decks, extracting tokens, auditing and polishing interfaces, colour critique, DESIGN.md (applied, inspected, exported or enforced in CI), Figma, FigCraft, motion, GSAP or CSS scroll; creating, editing or converting Office (Word, Excel, PowerPoint) and PDF files; implementing or reviewing changes, specs and handoffs, repo audits, shortcut debt or the Ponytail method; idea briefs, design documents, fresh reviews, contract READMEs, design drift reports; implementation plans executed under TDD; explaining a paper, article or concept as HTML, making and fact-checking explainers; humanizing prose; paper search; steering TokenEconomizer.",
     "replaces": [
       "landing-page-design",
       "figma-designer",
@@ -73,7 +73,8 @@
       "charles-polish",
       "charles-design-laws",
       "charles-design-tips",
-      "charles-ux-animation"
+      "charles-ux-animation",
+      "scrolltide-ai-studio"
     ]
   },
   "stack": {
@@ -1079,7 +1080,7 @@
     {
       "id": "charles-skills",
       "repo_url": "https://github.com/LemonFace0309/charles-skills",
-      "commit": "83de509dd10b77ebaf83c3f9986b538cdaf19b63",
+      "commit": "a24c5f2c54d477c67e5407d49ae6c9da08c7ed80",
       "pin": "head",
       "license": "MIT",
       "copyright": "Copyright (c) 2026 Charles Liu",
@@ -1100,9 +1101,9 @@
         "skills/design/charles-polish/scripts/package-lock.json",
         "skills/drops/charles-design-laws/SKILL.md",
         "skills/drops/charles-design-tips/SKILL.md",
-        "skills/drops/charles-ux-animation/SKILL.md",
-        "skills/drops/charles-ux-animation/references/recipes.md",
-        "skills/drops/charles-ux-animation/references/techniques.md",
+        "skills/design/charles-ux-animation/SKILL.md",
+        "skills/design/charles-ux-animation/references/recipes.md",
+        "skills/design/charles-ux-animation/references/techniques.md",
         "LICENSE"
       ],
       "excluded_paths": [
@@ -1120,8 +1121,9 @@
         "skills/drops/charles-design-laws/examples/**",
         "skills/drops/charles-design-tips/README.md",
         "skills/drops/charles-design-tips/examples/**",
-        "skills/drops/charles-ux-animation/README.md",
-        "skills/drops/charles-ux-animation/examples/**",
+        "skills/design/charles-ux-animation/README.md",
+        "skills/design/charles-ux-animation/evals/**",
+        "skills/design/charles-ux-animation/examples/**",
         "skills/drops/charles-create-posters/**",
         "skills/drops/charles-hero-mockups/**",
         "skills/editing/**",
@@ -1133,7 +1135,8 @@
         ".github/**",
         "AGENTS.md",
         "CLAUDE.md",
-        "README.md"
+        "README.md",
+        "skills/drops/charles-app-audit/**"
       ],
       "runtime_deps": [
         {
@@ -1154,6 +1157,61 @@
       ],
       "intake": {
         "goal": "Understand the five skills the owner took from this repository on 2026-11-25. First charles-color-analysis, a measured critique of the colour of a visual, page, app screen or palette with ranked OKLCH and hex fixes and before/after previews, and charles-polish, which takes a working interface from fine to finished (score anchors, the climb, the details table, the motion trees) and verifies motion frame by frame with its capture scripts. Then, from the drops shelf and on a recommendation the owner accepted, charles-design-laws (twenty laws of UX as one procedure for designing or reviewing a screen or a flow), charles-design-tips (twenty practical tips on type, spacing, colour, forms, copy and empty states, with a findings table) and charles-ux-animation (how an interface moves, responds and gets people through a task, with its recipes and techniques). Identify every outcome each supports, including each review-only mode and the check of someone else's colour critique, and compare with the existing catalog (design review and its polish pass, the motion specification and scroll code, layout structure, design guidance, the palette owners, design file authoring and inspection) and with each other: over a dozen laws are stated in both charles-design-laws and charles-ux-animation, and the five skills give different numbers for some of the same things. Justify one owner per output, stages or alternatives from the source evidence; do not preassign the destination by name or source order. Read the scripts' code for what each writes, what it starts and what leaves the machine. The upstream has no release or tag, so the pin follows its head. charles-polish hands a screen that still looks generated to charles-unslop, which is under CC BY 4.0 and outside the license gate, and charles-design-laws hands motion, targets and choices to charles-ux-animation, which is now a source: record what each hand-off needs; never tell the host that part of the source is not packaged. The other skills and shelves of the repository, the READMEs, the evals and the example pictures are not sources of this package."
+      }
+    },
+    {
+      "id": "scrolltide-ai-studio",
+      "repo_url": "https://github.com/scrolltide/ai-studio-skill",
+      "commit": "5662f4f20de1398b1b2c6818b4a64d407662d9e2",
+      "pin": "release",
+      "release": "v1.0.0",
+      "license": "MIT",
+      "license_section": {
+        "start": "MIT License",
+        "end": "SOFTWARE.",
+        "reason": "Root LICENSE is dual-licensed: section 1 (MIT) covers the skill instructions, house style, patterns, checks, handoff and scripts; section 2 (proprietary, non-redistributable) covers library/*.md, which are excluded."
+      },
+      "copyright": "Copyright (c) 2026 Scrolltide",
+      "selected_paths": [
+        "plugins/ai-studio/skills/scrolltide-ai-studio/SKILL.md",
+        "plugins/ai-studio/skills/scrolltide-ai-studio/house-style.md",
+        "plugins/ai-studio/skills/scrolltide-ai-studio/checks.md",
+        "plugins/ai-studio/skills/scrolltide-ai-studio/handoff.md",
+        "plugins/ai-studio/skills/scrolltide-ai-studio/patterns/**",
+        "plugins/ai-studio/skills/scrolltide-ai-studio/scripts/scrollshot.mjs"
+      ],
+      "excluded_paths": [
+        "plugins/ai-studio/skills/scrolltide-ai-studio/library/**",
+        "plugins/ai-studio/.claude-plugin/**",
+        ".claude-plugin/**",
+        "docs/**",
+        "tools/**",
+        "README.md",
+        ".gitignore",
+        ".gitattributes"
+      ],
+      "omissions": [
+        {
+          "paths": [
+            "plugins/ai-studio/skills/scrolltide-ai-studio/library/**"
+          ],
+          "reason": "Section 2 of the upstream LICENSE reserves all rights on library/*.md and forbids redistributing them as templates, prompts, kits or part of another library. library/INDEX.md is also omitted because it exists only to index those non-redistributable builds; the MIT patterns, house style, checkpoint script and optional Scrolltide MCP remain the packaged runtime method (owner decision of 2026-11-28)."
+        }
+      ],
+      "runtime_deps": [
+        {
+          "name": "Node.js 18+ with Playwright (or playwright-core + installed Chrome/Edge) for scripts/scrollshot.mjs",
+          "license": "MIT (Node.js), Apache-2.0 (Playwright); installed at run time in the target project when missing, not bundled by Muro",
+          "bundled": false
+        },
+        {
+          "name": "Scrolltide MCP (optional remote MCP server for searching and pulling full builds on Scrolltide Yearly/Lifetime plans)",
+          "license": "External remote service, not bundled by Muro; used only when the user has connected it",
+          "bundled": false
+        }
+      ],
+      "intake": {
+        "goal": "Owner decision of 2026-11-28: absorb the MIT-licensed part of scrolltide/ai-studio-skill v1.0.0 (SKILL.md, house-style.md, checks.md, handoff.md, patterns/**, scripts/scrollshot.mjs) while excluding the proprietary non-redistributable library/*.md builds. Classify all supported outcomes (scroll-driven storytelling pages/heroes/sections from patterns + house style or connected Scrolltide MCP, full-source builder handoff prompts, and multi-checkpoint Playwright scroll QA with scrollshot.mjs) and harmonize relations with visual-direction, gsap-scrolltrigger, css-scroll, motion-principles, design-review, interface-polish and design-file."
       }
     }
   ]
