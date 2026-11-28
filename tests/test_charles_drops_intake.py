@@ -21,15 +21,16 @@ from routing_helpers import ROOT, decision
 
 from project_dir import PACKAGE  # the project file, unpacked
 SOURCE = "charles-skills"
-COMMIT = "83de509dd10b77ebaf83c3f9986b538cdaf19b63"
+COMMIT = "a24c5f2c54d477c67e5407d49ae6c9da08c7ed80"
 DROPS = "skills/drops"
+DESIGN = "skills/design"
 FILES = [f"{DROPS}/charles-design-laws/SKILL.md", f"{DROPS}/charles-design-tips/SKILL.md",
-         f"{DROPS}/charles-ux-animation/SKILL.md", f"{DROPS}/charles-ux-animation/references/recipes.md",
-         f"{DROPS}/charles-ux-animation/references/techniques.md"]
+         f"{DESIGN}/charles-ux-animation/SKILL.md", f"{DESIGN}/charles-ux-animation/references/recipes.md",
+         f"{DESIGN}/charles-ux-animation/references/techniques.md"]
 CAPS = {
-    "ux-laws": ("charles-design-laws", ["ui.ux-laws", "ui.ux-laws-review"], ["ux_changes", "ux_report"]),
-    "design-tips": ("charles-design-tips", ["ui.design-tips", "ui.design-tips-review"], ["tips_changes", "tips_report"]),
-    "interaction-motion": ("charles-ux-animation", ["ui.interaction-motion", "ui.interaction-review"],
+    "ux-laws": ("charles-design-laws", DROPS, ["ui.ux-laws", "ui.ux-laws-review"], ["ux_changes", "ux_report"]),
+    "design-tips": ("charles-design-tips", DROPS, ["ui.design-tips", "ui.design-tips-review"], ["tips_changes", "tips_report"]),
+    "interaction-motion": ("charles-ux-animation", DESIGN, ["ui.interaction-motion", "ui.interaction-review"],
                            ["interaction_changes", "interaction_report"]),
 }
 RECORDED = {"design_file", "design_tokens", "constraints", "aesthetic_direction", "design_candidates", "stack_guidance"}
@@ -67,16 +68,16 @@ def test_the_same_source_selects_the_three_skills_and_leaves_the_rest_of_the_she
     # No blanket exclusion covers a selected file any more; the two image-generating drops stay out.
     assert f"{DROPS}/**" not in src["excluded_paths"]
     for left_out in (f"{DROPS}/charles-create-posters/**", f"{DROPS}/charles-hero-mockups/**",
-                     f"{DROPS}/charles-ux-animation/examples/**", f"{DROPS}/charles-design-laws/README.md"):
+                     f"{DESIGN}/charles-ux-animation/examples/**", f"{DROPS}/charles-design-laws/README.md"):
         assert left_out in src["excluded_paths"], left_out
     assert "media_paths" not in src and "intake_only_paths" not in src
     assert {"charles-design-laws", "charles-design-tips", "charles-ux-animation"} <= set(manifest["plugin"]["replaces"])
-    assert len(manifest["sources"]) == 18                       # three skills more, no source more
+    assert len(manifest["sources"]) == 19
 
 
 @pytest.mark.parametrize("capability", sorted(CAPS))
 def test_each_procedure_matches_the_router_and_keeps_source_provenance(capability):
-    skill, intents, outputs = CAPS[capability]
+    skill, shelf, intents, outputs = CAPS[capability]
     cap = catalog()[capability]
     row = next(row for row in parse_router(PACKAGE / "ROUTER.md") if row.id == capability)
     assert cap.role == row.role == capability
@@ -100,10 +101,10 @@ def test_each_procedure_matches_the_router_and_keeps_source_provenance(capabilit
     for check in cap.checks:
         assert f"**{check}**" in cap.body
     body = before_sources(cap)
-    assert f"<package_root>/scripts/{SOURCE}/{DROPS}/{skill}" in body
+    assert f"<package_root>/scripts/{SOURCE}/{shelf}/{skill}" in body
     assert "/SKILL.source.md" in body and "/SKILL.md" not in body
     # No body sends the host to a skill of the repository: a hand-off names a capability of the package.
-    assert "charles-" not in body.replace(f"{SOURCE}/{DROPS}/{skill}", "")
+    assert "charles-" not in body.replace(f"{SOURCE}/{shelf}/{skill}", "")
     tools = {tool["name"]: tool for tool in cap.tools}
     assert tools["file-access"]["required"] is True and tools["browser"]["required"] is False
 
@@ -143,14 +144,14 @@ def test_the_design_tips_carry_the_source_numbers_and_report_a_recorded_token():
 def test_interaction_motion_carries_the_source_numbers_and_yields_to_a_recorded_specification():
     cap = catalog()["interaction-motion"]
     body = cap.body
-    for phrase in ("Never add a library for what a CSS transition does", "many times a session or from the keyboard",
-                   "each move up to 500ms", "about 2.5s", "100–150ms", "only after 300ms and held at least 500ms",
-                   "30–50ms apart, only the first 6", "80–100ms apart", "tooltip 125ms", "150–250ms", "200–300ms",
+    for phrase in ("Never add a library for what a CSS transition does", "from the keyboard or many times a day",
+                   "each move up to 500ms", "up to 2.5s", "100–150ms", "only after 300ms and held at least 500ms",
+                   "40–70ms apart, only the first 6", "80–100ms apart", "tooltip 125ms", "150–250ms", "200–300ms",
                    "300–400ms", "Exits are 20–30% shorter", "`cubic-bezier(0.32, 0.72, 0, 1)`",
-                   "never ease-in for an entrance", "never `transition: all`", "never `scale(0)`",
-                   "`scale(0.96)` on `:active`, never below 0.95", "`@media (hover: hover) and (pointer: fine)`",
+                   "never ease-in in product UI", "never `transition: all`", "never `scale(0)`",
+                   "`scale(0.97)` on `:active`, never below 0.95", "`@media (hover: hover) and (pointer: fine)`",
                    "44×44px on touch and 40×40px with a pointer", "never below 24×24px", "groups of 7 or fewer",
-                   "Undo for at least 5 seconds", "do not build a harness", "fades included"):
+                   "Undo in a toast for at least 5s", "do not build a harness", "fades included"):
         assert phrase in body, phrase
     assert {"motion-spec", "reduced-motion"} <= set(cap.reads)
     assert set(cap.check_conditions) == {"numbers_in_named_tokens", "recorded_motion_respected", "reduced_motion_holds"}
@@ -228,7 +229,7 @@ def test_examples_eval_cases_and_neighbours_state_the_boundaries():
 def test_explicit_ai_fixtures_select_each_capability_as_one_direct_step(coordinator, task, capability):
     result = coordinator.propose(task, set(), classification=decision(coordinator, task, [capability]))
     assert result["mode"] == "direct" and result["capability"] == capability
-    assert result["required_outputs"] == CAPS[capability][2]
+    assert result["required_outputs"] == CAPS[capability][3]
     assert not coordinator.state_dir.exists()
 
 

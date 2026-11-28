@@ -21,7 +21,7 @@ from routing_helpers import ROOT, decision
 
 from project_dir import PACKAGE  # the project file, unpacked
 SOURCE = "charles-skills"
-COMMIT = "83de509dd10b77ebaf83c3f9986b538cdaf19b63"
+COMMIT = "a24c5f2c54d477c67e5407d49ae6c9da08c7ed80"
 COLOR, POLISH = "color-critique", "interface-polish"
 COLOR_DIR = "skills/design/charles-color-analysis"
 POLISH_DIR = "skills/design/charles-polish"

@@ -7,4 +7,4 @@ on:
 permissions: { contents: write }
 jobs:
   store:
-    uses: acaprino/muro/.github/workflows/project-store.yml@muro-v0.10.0
+    uses: acaprino/muro/.github/workflows/project-store.yml@muro-v0.11.6
