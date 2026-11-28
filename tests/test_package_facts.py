@@ -141,6 +141,7 @@ def test_manifest_declares_a_mode_for_every_source():
         "text-humanizer": ("head", None),
         "better-layout": ("head", None),
         "charles-skills": ("head", None),
+        "scrolltide-ai-studio": ("release", "v1.0.0"),
     }
 
 
@@ -339,11 +340,11 @@ def test_the_eval_gold_is_valid_with_at_least_ten_cases_and_a_no_match():
     assert any(c["expect"]["status"] == "no_match" for c in cases["cases"])
 
 
-def test_the_router_holds_43_rows_and_parses_under_the_text_cap():
+def test_the_router_holds_45_rows_and_parses_under_the_text_cap():
     # Split from test_lessons::test_router_line_cap_counts_prose_not_catalog_rows.
     text = (MARIONETTE / "ROUTER.md").read_text(encoding="utf-8")
     rows = [line for line in text.splitlines() if line.startswith("| ") and not line.startswith("| id ")]
-    assert len(rows) == 43 == len(parse_router(MARIONETTE / "ROUTER.md"))
+    assert len(rows) == 45 == len(parse_router(MARIONETTE / "ROUTER.md"))
 
 
 # --- From test_audit_p0 -------------------------------------------------------------------------------------
@@ -399,14 +400,14 @@ def test_the_focused_plan_of_the_whole_catalog_fits_inline_on_the_host(tmp_path)
     consumer.mkdir()
     task = "Disegna in Figma la landing page di Lumo. Non abbiamo ancora una struttura dei contenuti."
     full = run(pkg, consumer, "plan", "--compact", "--task", task)
-    out = run(pkg, consumer, "plan", "--compact", "--focus", "visual-direction,design-guidance,canvas-design", "--task", task)
+    out = run(pkg, consumer, "plan", "--compact", "--focus", "visual-direction,scroll-storytelling,design-guidance,canvas-design", "--task", task)
     assert len(out.encode("utf-8")) < INLINE_LIMIT < 30000, len(out.encode("utf-8"))
     brief_all = run(pkg, consumer, "plan", "--compact", "--brief", "--task", task)
     assert len(brief_all.encode("utf-8")) < len(out.encode("utf-8")) < len(full.encode("utf-8"))
     data = json.loads(out)
     assert data["classification_path"].endswith(str(Path(".marionette") / "classification.json"))
     entries = {e["id"]: e for e in json.loads(full)["catalog"]}
-    assert len(entries) == 43
+    assert len(entries) == 45
     authored = json.loads((MARIONETTE / "entries.json").read_text(encoding="utf-8"))["entries"]
     groups = [e for e in data["catalog"] if "id" not in e]
     assert len(groups) == len(authored) - 1                  # the entry wholly in focus leaves nothing to index
